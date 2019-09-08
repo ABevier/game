@@ -6,7 +6,10 @@
   "scripts": {
     "build": "npm run build-ts && npm run copy-static-assets",
     "build-ts": "tsc",
-    "copy-static-assets": "ts-node copyStaticAssets.ts"
+    "copy-static-assets": "ts-node copyStaticAssets.ts",
+    "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
+    "watch-ts": "tsc -w",
+    "watch-node": "nodemon dist/server.js"
   },
   "repository": {
     "type": "git",
@@ -23,7 +26,9 @@
     "@types/node": "^12.7.4",
     "@types/shelljs": "^0.8.5",
     "@types/socket.io": "^2.1.2",
+    "concurrently": "^4.1.2",
     "eslint": "^6.3.0",
+    "nodemon": "^1.19.2",
     "shelljs": "^0.8.3",
     "ts-node": "^8.3.0",
     "typescript": "^3.6.2"

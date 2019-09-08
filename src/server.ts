@@ -1,20 +1,28 @@
 import express from 'express';
-import http from 'http';
-import io from 'socket.io';
+import {createServer, Server } from 'http';
+import socketIo from 'socket.io';
+import path from 'path';
 
 const app = express();
 const port = 8080;
 
-const server = new http.Server(app);
+const server = createServer(app);
 
-app.use('/js', express.static(__dirname + 'public/js'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/public/html/index.html')
+    res.sendFile(path.join(__dirname, 'public/html/index.html'));
 });
 
-io.listen(server);
+const io = socketIo(server);
+io.on("connection", socket => {
+    console.log("A user connected");
+    socket.on("message", message => {
+        console.log(message);
+        socket.emit("message", "PONG!");
+    });
+});
 
-app.listen(port, () => {
+server.listen(port, () => {
     console.log(`Server started at http://localhost:${port}`);
 });
