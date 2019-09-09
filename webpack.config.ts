@@ -1,5 +1,6 @@
 import path from 'path';
 import { Configuration } from 'webpack';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 const nodeModulesPath = path.resolve(__dirname, 'node_modules');
 
@@ -41,6 +42,13 @@ const config: Configuration = {
     'react': 'React',
     'react-dom': 'ReactDOM',
   },
+  plugins: [
+    new HtmlWebpackPlugin({
+        template: "./index.html",
+        filename: "index.html",
+        inject: "body"
+    }),
+  ],
 };
 
 export default config;
