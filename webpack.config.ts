@@ -1,6 +1,7 @@
 import path from 'path';
 import { Configuration } from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import cssnano from 'cssnano';
 
 const nodeModulesPath = path.resolve(__dirname, 'node_modules');
 
@@ -31,6 +32,17 @@ const config: Configuration = {
         test: /\.tsx?$/,
         use: ['ts-loader'],
         exclude: [/node_modules/, nodeModulesPath],
+      },
+      {
+        test: /\.css$/,
+        use: [
+          {
+            loader: 'style-loader',
+          },
+          {
+            loader: 'css-loader',
+          },
+        ],
       },
       {
         test: /.jpe?g$|.gif$|.png$|.svg$|.woff$|.woff2$|.ttf$|.eot$/,
