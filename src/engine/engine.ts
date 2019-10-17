@@ -2,25 +2,34 @@
 export class Character {
     hp: number = 100
 
-    takeDamage(damage: number) {
+    takeDamage(damage: number): number {
         this.hp -= damage;
+        return damage;
     }
 }
 
 export interface Command {
-    apply(): void
+    apply(state: BattleState): void
 }
 
 export class AttackCommand implements Command {
-    constructor(readonly source: Character, readonly target: Character) {
+    constructor(readonly sourceId: string, readonly targetId: string) {
     }
 
-    apply(): void {
-        this.target.takeDamage(5);
+    apply(state: BattleState): void {
+        const target = state.findCharacter(this.targetId);
+        const damage = target.takeDamage(5);
     }
 }
 
 export class BattleState {
-    players: Character[] = [];
-    enemies: Character[] = [];
+    characters: Map<string, Character> = new Map();
+
+    findCharacter(id: string) {
+        return this.characters.get(id);
+    }
+}
+
+export interface BattleEvent {
+
 }

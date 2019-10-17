@@ -1,10 +1,13 @@
-import {Character, AttackCommand} from './engine'
+import {Character, AttackCommand, BattleState} from './engine'
 
 test('hax', () => {
-    const source = new Character();
-    const target = new Character();
-    const attack = new AttackCommand(source, target);
+    const state = new BattleState();
+    state.characters.set("src", new Character());
+    state.characters.set("tgt", new Character());
 
-    attack.apply();
-    expect(target.hp).toBe(95);
+    const attack = new AttackCommand("src", "tgt");
+
+    attack.apply(state);
+
+    expect(state.findCharacter("tgt").hp).toBe(95);
 });
