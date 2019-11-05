@@ -14,21 +14,27 @@ export class GameScene extends Phaser.Scene {
         const result = sum(1, 2, 3);
         console.log(`The result is: ${result}`);
 
-        this.makeContainer(100, 400);
+        this.makeContainer("Hero1", 100, 400, false);
+        this.makeContainer("Hero2", 375, 400, false);
+        this.makeContainer("Hero3", 650, 400, false);
 
-        this.makeContainer(375, 400);
-
-        this.makeContainer(650, 400);
+        this.makeContainer("Goblin1", 250, 100, true);
+        this.makeContainer("Goblin2", 525, 100, true);
     }
 
-    private makeContainer(x: number, y: number): Phaser.GameObjects.Container {
+    private makeContainer(name: string, x: number, y: number, badGuy: boolean): Phaser.GameObjects.Container {
         const container = this.add.container(x, y);
 
-        const bground = this.add.rectangle(0, 0, 250, 100, 0x0000FF);
+        const color = badGuy ? 0xFF0000 : 0x0000FF;
+
+        const bground = this.add.rectangle(0, 0, 250, 100, color);
         bground.setOrigin(0, 0);
+        bground.setInteractive();
+        bground.on('pointerdown', () => console.log(`Clicked on ${name}`));
+        
         container.add(bground);
 
-        const txt = this.add.text(5, 5, "Hero");
+        const txt = this.add.text(5, 5, name);
         txt.setOrigin(0, 0);
         container.add(txt);
 
