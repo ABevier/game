@@ -12,7 +12,7 @@ export class GameScene extends Phaser.Scene {
         })
     }
 
-    private stateManager: StateManager = new StateManager();
+    private stateManager: StateManager = new StateManager(this);
     private characters: DCharacter[] = [];
 
     public create() {
@@ -28,9 +28,9 @@ export class GameScene extends Phaser.Scene {
 
         this.stateManager.nextState(new MainState(this.stateManager, this.characters));
 
-        this.showMenuItems(["hello", "world", "to", "you"], (item: MenuItem) => {
-            console.log(`Item = ${item.menuText} was clicked`);
-        })
+        // this.showMenuItems(["hello", "world", "to", "you"], (item: MenuItem) => {
+        //     console.log(`Item = ${item.menuText} was clicked`);
+        // })
     }
 
 
@@ -38,11 +38,18 @@ export class GameScene extends Phaser.Scene {
         //TODO
     }
 
+    private menuItems: MenuItem[] = [];
+
     public showMenuItems(items: string[], handler: Function): void {
         const startY = 240;
-        items.forEach((element, idx) => {
-            new MenuItem(this, 100, (idx * 30) + startY, element, handler);
-        });
+        this.menuItems = items.map((element, idx) => 
+            new MenuItem(this, 100, (idx * 30) + startY, element, handler)
+        );
+    }
+
+    public destroyMenuItems() {
+        this.menuItems.forEach(item => item.destroy());
+        this.menuItems = [];
     }
 }
 
@@ -65,6 +72,11 @@ export class MenuItem {
         const text = scene.add.text(3, 5, menuText);
         text.setOrigin(0, 0);
         this.container.add(text);
+    }
+
+    destroy(): void {
+        console.log("destroying item");
+        this.container.destroy();
     }
 }
 
@@ -98,7 +110,7 @@ export class DCharacter {
         this.background.fillColor = 0x00FF00;
     }
 
-    public getMenuItems(): String[] {
+    public getMenuItems(): string[] {
         return ["attack", "attack2"];
     }
 }

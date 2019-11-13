@@ -1,4 +1,4 @@
-import { DCharacter } from "../gameScene";
+import { DCharacter, GameScene, MenuItem } from "../gameScene";
 
 interface State {
     enter(): void;
@@ -8,6 +8,9 @@ interface State {
 export class StateManager {
 
     private currentState : State;
+
+    constructor(public readonly gameScene: GameScene)  {
+    }
 
     public nextState(state: State) {
         if (this.currentState) {
@@ -50,7 +53,15 @@ export class ActivateCharacterState implements State {
     enter(): void {
         console.log("Enter ActivateCharacterState");
         this.activeCharacter.activate();
+
+        const menuItems = this.activeCharacter.getMenuItems();
+        this.stateManager.gameScene.showMenuItems(menuItems, this.onMenuItemClick.bind(this));
     }    
+
+    private onMenuItemClick(menuItem: MenuItem) {
+        console.log(`ActivateCharacter state recieved click: ${menuItem.menuText}`);
+        this.stateManager.gameScene.destroyMenuItems();
+    }
 
     exit(): void {
         console.log("Exit ActivateCharacterState");
