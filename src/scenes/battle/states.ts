@@ -60,10 +60,27 @@ export class ActivateCharacterState implements State {
 
     private onMenuItemClick(menuItem: MenuItem) {
         console.log(`ActivateCharacter state recieved click: ${menuItem.menuText}`);
-        this.stateManager.gameScene.destroyMenuItems();
+
+        const nextState = new SelectTargetState(this.stateManager);
+        this.stateManager.nextState(nextState);
     }
 
     exit(): void {
+        this.stateManager.gameScene.destroyMenuItems();
         console.log("Exit ActivateCharacterState");
+    }
+}
+
+export class SelectTargetState implements State {
+
+    constructor(private readonly stateManager: StateManager) {
+    }
+
+    enter(): void {
+        console.log("Enter SelectCharacterState");
+    }
+
+    exit(): void {
+        console.log("Exit SelectCharacterState");
     }
 }

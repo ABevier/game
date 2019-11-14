@@ -1,6 +1,5 @@
 import { sum } from "../engine/foo";
 import { StateManager, MainState } from "./battle/states";
-import { on } from "cluster";
 
 export class GameScene extends Phaser.Scene {
 
@@ -14,17 +13,21 @@ export class GameScene extends Phaser.Scene {
 
     private stateManager: StateManager = new StateManager(this);
     private characters: DCharacter[] = [];
+    private heros: DCharacter[] = [];
+    private enemies: DCharacter[] = [];
 
     public create() {
         const result = sum(1, 2, 3);
         console.log(`The result is: ${result}`);
 
-        this.characters.push(new DCharacter(this, "Hero1", 100, 400, false));
-        this.characters.push(new DCharacter(this, "Hero2", 375, 400, false));
-        this.characters.push(new DCharacter(this, "Hero3", 650, 400, false));
+        this.heros.push(new DCharacter(this, "Hero1", 100, 400, false));
+        this.heros.push(new DCharacter(this, "Hero2", 375, 400, false));
+        this.heros.push(new DCharacter(this, "Hero3", 650, 400, false));
 
-        this.characters.push(new DCharacter(this, "Goblin1", 250, 100, true));
-        this.characters.push(new DCharacter(this, "Goblin2", 525, 100, true));
+        this.enemies.push(new DCharacter(this, "Goblin1", 250, 100, true));
+        this.enemies.push(new DCharacter(this, "Goblin2", 525, 100, true));
+
+        this.characters = [...this.heros, ...this.enemies];
 
         this.stateManager.nextState(new MainState(this.stateManager, this.characters));
 
@@ -50,6 +53,10 @@ export class GameScene extends Phaser.Scene {
     public destroyMenuItems() {
         this.menuItems.forEach(item => item.destroy());
         this.menuItems = [];
+    }
+
+    public registerCharacterForCharacterClick() {
+
     }
 }
 
