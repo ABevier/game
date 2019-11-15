@@ -9,7 +9,9 @@ export class StateManager {
 
     private currentState : State;
 
-    constructor(public readonly gameScene: GameScene)  {
+    constructor(
+        public readonly gameScene: GameScene, 
+        public readonly characters: DCharacter[]) {
     }
 
     public nextState(state: State) {
@@ -25,14 +27,13 @@ export class StateManager {
 export class MainState implements State {
 
     constructor(
-        private readonly stateManager: StateManager,
-        private readonly characters: DCharacter[]) {
+        private readonly stateManager: StateManager) {
     }
 
     enter(): void {
         console.log("Enter Main State");
-        const nextCharacter = this.characters.shift();
-        this.characters.push(nextCharacter);
+        const nextCharacter = this.stateManager.characters.shift();
+        this.stateManager.characters.push(nextCharacter);
 
         const nextState = new ActivateCharacterState(this.stateManager, nextCharacter);        
         this.stateManager.nextState(nextState);
@@ -67,6 +68,7 @@ export class ActivateCharacterState implements State {
 
     exit(): void {
         this.stateManager.gameScene.destroyMenuItems();
+        this.activeCharacter.deactivate();
         console.log("Exit ActivateCharacterState");
     }
 }
@@ -78,9 +80,16 @@ export class SelectTargetState implements State {
 
     enter(): void {
         console.log("Enter SelectCharacterState");
+        this.stateManager.gameScene.registerEnemiesForClick(this.onEnemyClick.bind(this));
+    }
+
+    private onEnemyClick(character: DCharacter) {
+        console.log(`An enemy was clicked ${character.getName()}`);
+        this.stateManager.nextState(new MainState(this.stateManager));
     }
 
     exit(): void {
         console.log("Exit SelectCharacterState");
+        this.stateManager.gameScene.removeEnemyClickHandlers();
     }
 }

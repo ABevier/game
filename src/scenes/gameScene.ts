@@ -11,7 +11,7 @@ export class GameScene extends Phaser.Scene {
         })
     }
 
-    private stateManager: StateManager = new StateManager(this);
+    private stateManager: StateManager; 
     private characters: DCharacter[] = [];
     private heros: DCharacter[] = [];
     private enemies: DCharacter[] = [];
@@ -29,7 +29,8 @@ export class GameScene extends Phaser.Scene {
 
         this.characters = [...this.heros, ...this.enemies];
 
-        this.stateManager.nextState(new MainState(this.stateManager, this.characters));
+        this.stateManager =  new StateManager(this, this.characters);
+        this.stateManager.nextState(new MainState(this.stateManager));
 
         // this.showMenuItems(["hello", "world", "to", "you"], (item: MenuItem) => {
         //     console.log(`Item = ${item.menuText} was clicked`);
@@ -55,8 +56,12 @@ export class GameScene extends Phaser.Scene {
         this.menuItems = [];
     }
 
-    public registerCharacterForCharacterClick() {
+    public registerEnemiesForClick(handler: Function) {
+        this.enemies.forEach(enemy => enemy.registerClickHandler(handler));
+    }
 
+    public removeEnemyClickHandlers() {
+        this.enemies.forEach(enemy => enemy.deregisterClickHandler());
     }
 }
 
@@ -89,19 +94,19 @@ export class MenuItem {
 
 export class DCharacter {
     private readonly background: Phaser.GameObjects.Rectangle;
+    private readonly name: string
+
+    private readonly color: number;
 
     public constructor(scene: Phaser.Scene, name: string, x: number, y: number, badGuy: boolean) {
+        this.name = name;
+
         const container = scene.add.container(x, y);
+        this.color = badGuy ? 0xFF0000 : 0x0000FF;
 
-        const color = badGuy ? 0xFF0000 : 0x0000FF;
-
-        this.background = scene.add.rectangle(0, 0, 250, 100, color);
+        this.background = scene.add.rectangle(0, 0, 250, 100, this.color);
         this.background.setOrigin(0, 0);
         this.background.setInteractive();
-        this.background.on('pointerdown', () => {
-            console.log(`Clicked on ${name}`);
-            this.activate();
-        });
         container.add(this.background);
 
         const txt = scene.add.text(5, 5, name);
@@ -117,7 +122,25 @@ export class DCharacter {
         this.background.fillColor = 0x00FF00;
     }
 
+    public deactivate(): void {
+        this.background.fillColor = this.color;
+    }
+
     public getMenuItems(): string[] {
         return ["attack", "attack2"];
+    }
+
+    public registerClickHandler(handler: Function): void {
+        this.background.on('pointerdown', () => {
+            handler(this);
+        });
+    }
+
+    public deregisterClickHandler(): void {
+        this.background.off('pointerdown');
+    }
+
+    public getName(): string {
+        return this.name;
     }
 }
