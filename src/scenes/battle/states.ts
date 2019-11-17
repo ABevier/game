@@ -32,11 +32,17 @@ export class MainState implements State {
 
     enter(): void {
         console.log("Enter Main State");
+
         const nextCharacter = this.stateManager.characters.shift();
         this.stateManager.characters.push(nextCharacter);
 
-        const nextState = new ActivateCharacterState(this.stateManager, nextCharacter);        
-        this.stateManager.nextState(nextState);
+        if (nextCharacter.getIsEnemy()) {
+            //TODO: activate enemy turn
+            this.stateManager.nextState(new MainState(this.stateManager));
+        } else {
+            const nextState = new ActivateCharacterState(this.stateManager, nextCharacter);        
+            this.stateManager.nextState(nextState);
+        }
     }
 
     exit(): void {
@@ -85,7 +91,7 @@ export class SelectTargetState implements State {
 
     private onEnemyClick(character: DCharacter) {
         console.log(`An enemy was clicked ${character.getName()}`);
-        this.stateManager.nextState(new MainState(this.stateManager));
+        this.stateManager.nextState(new ProcessCommandState(this.stateManager, character));
     }
 
     exit(): void {
@@ -93,3 +99,26 @@ export class SelectTargetState implements State {
         this.stateManager.gameScene.removeEnemyClickHandlers();
     }
 }
+
+export class ProcessCommandState implements State {
+
+    constructor(
+        private readonly stateManager: StateManager,
+        private readonly target: DCharacter) {
+    }
+
+    enter(): void {
+        console.log("Enter ProcessCommandState");
+        this.target.setHP(this.target.getHp() - 5);
+
+        let pos = this.target.getPosition();
+
+        let text = this.stateManager.gameScene.add.text(pos.x, pos.y, "5");
+
+        this.stateManager.nextState(new MainState(this.stateManager));
+    }
+
+    exit(): void {
+        console.log("Exit ProcessCommandState");
+    }
+} 

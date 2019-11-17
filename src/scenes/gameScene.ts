@@ -94,15 +94,21 @@ export class MenuItem {
 
 export class DCharacter {
     private readonly background: Phaser.GameObjects.Rectangle;
+    private readonly hpText: Phaser.GameObjects.Text;
+
     private readonly name: string
+    private hp: number;
 
     private readonly color: number;
 
-    public constructor(scene: Phaser.Scene, name: string, x: number, y: number, badGuy: boolean) {
+    private readonly isEnemy: boolean;
+
+    public constructor(scene: Phaser.Scene, name: string, x: number, y: number, isEnemy: boolean) {
         this.name = name;
 
         const container = scene.add.container(x, y);
-        this.color = badGuy ? 0xFF0000 : 0x0000FF;
+        this.isEnemy = isEnemy;
+        this.color = isEnemy ? 0xFF0000 : 0x0000FF;
 
         this.background = scene.add.rectangle(0, 0, 250, 100, this.color);
         this.background.setOrigin(0, 0);
@@ -113,9 +119,20 @@ export class DCharacter {
         txt.setOrigin(0, 0);
         container.add(txt);
 
-        const hp = scene.add.text(5, 20, "HP: 100/100");
-        hp.setOrigin(0, 0);
-        container.add(hp);
+        this.hpText = scene.add.text(5, 20, "");
+        this.hpText.setOrigin(0, 0);
+        container.add(this.hpText);
+
+        this.setHP(100);
+    }
+
+    public getHp(): number {
+        return this.hp;
+    }
+
+    public setHP(value: number): void {
+        this.hp = value;
+        this.hpText.setText(`HP: ${value}/100`);
     }
 
     public activate(): void {
@@ -142,5 +159,13 @@ export class DCharacter {
 
     public getName(): string {
         return this.name;
+    }
+    
+    public getIsEnemy(): boolean {
+        return this.isEnemy;
+    }
+
+    public getPosition(): Phaser.Math.Vector2 {
+        return this.background.getCenter();
     }
 }
