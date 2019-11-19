@@ -102,6 +102,8 @@ export class SelectTargetState implements State {
 
 export class ProcessCommandState implements State {
 
+    private text: Phaser.GameObjects.Text;
+
     constructor(
         private readonly stateManager: StateManager,
         private readonly target: DCharacter) {
@@ -113,8 +115,34 @@ export class ProcessCommandState implements State {
 
         let pos = this.target.getPosition();
 
-        let text = this.stateManager.gameScene.add.text(pos.x, pos.y, "5");
+        this.text = this.stateManager.gameScene.add.text(pos.x, pos.y, "5");
+        const timeline = this.stateManager.gameScene.tweens.createTimeline({
+            targets: [this.text],
+        });
 
+        timeline.setCallback('onComplete', this.onComplete, [], this);
+
+        timeline.add({
+            targets: this.text,
+            y: '-=100',
+            duration: 250
+        });
+
+        timeline.add({
+            targets: this.text,
+            y: '+=100',
+            duration: 250,
+            ease: 'Bounce.Out'
+        })
+        
+        console.log(timeline.callbacks);
+
+        timeline.play();
+    }
+
+    onComplete(tween: any, targets: []): void {
+        console.log("on complete");
+        this.text.destroy();
         this.stateManager.nextState(new MainState(this.stateManager));
     }
 

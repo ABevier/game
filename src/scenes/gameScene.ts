@@ -1,5 +1,6 @@
 import { sum } from "../engine/foo";
 import { StateManager, MainState } from "./battle/states";
+import { posix } from "path";
 
 export class GameScene extends Phaser.Scene {
 
@@ -93,6 +94,8 @@ export class MenuItem {
 }
 
 export class DCharacter {
+
+    private readonly container: Phaser.GameObjects.Container;
     private readonly background: Phaser.GameObjects.Rectangle;
     private readonly hpText: Phaser.GameObjects.Text;
 
@@ -106,22 +109,22 @@ export class DCharacter {
     public constructor(scene: Phaser.Scene, name: string, x: number, y: number, isEnemy: boolean) {
         this.name = name;
 
-        const container = scene.add.container(x, y);
+        this.container = scene.add.container(x, y);
         this.isEnemy = isEnemy;
         this.color = isEnemy ? 0xFF0000 : 0x0000FF;
 
         this.background = scene.add.rectangle(0, 0, 250, 100, this.color);
         this.background.setOrigin(0, 0);
         this.background.setInteractive();
-        container.add(this.background);
+        this.container.add(this.background);
 
         const txt = scene.add.text(5, 5, name);
         txt.setOrigin(0, 0);
-        container.add(txt);
+        this.container.add(txt);
 
         this.hpText = scene.add.text(5, 20, "");
         this.hpText.setOrigin(0, 0);
-        container.add(this.hpText);
+        this.container.add(this.hpText);
 
         this.setHP(100);
     }
@@ -166,6 +169,9 @@ export class DCharacter {
     }
 
     public getPosition(): Phaser.Math.Vector2 {
-        return this.background.getCenter();
+        let pos = this.background.getCenter();
+        pos.x += this.container.x;
+        pos.y += this.container.y;
+        return pos;
     }
 }
