@@ -1,6 +1,5 @@
 import { sum } from "../engine/foo";
 import { StateManager, MainState } from "./battle/states";
-import { posix } from "path";
 
 export class GameScene extends Phaser.Scene {
 
