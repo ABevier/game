@@ -116,6 +116,7 @@ export class ProcessCommandState implements State {
         let pos = this.target.getPosition();
 
         this.text = this.stateManager.gameScene.add.text(pos.x, pos.y, "5");
+        //this.stateManager.gameScene.tweens.timeline()
         const timeline = this.stateManager.gameScene.tweens.createTimeline({
             targets: [this.text],
         });
