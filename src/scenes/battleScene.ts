@@ -1,17 +1,23 @@
 import * as Phaser from 'phaser';
 
+type Vector2 = Phaser.Math.Vector2;
+
 export class BattleScene extends Phaser.Scene {
 
     private goButton: Phaser.GameObjects.Sprite;
 
     private dragon: Phaser.GameObjects.Sprite;
+    private currentRotation = 0; 
 
     private graphics: Phaser.GameObjects.Graphics;
     private square: Phaser.GameObjects.Sprite;
 
     private curve: Phaser.Curves.QuadraticBezier;
     private controlPoint: Phaser.Math.Vector2;
-    private path: Phaser.Math.Vector2[] = [];
+    private path: Vector2[] = [];
+
+    // Add 90 degrees because 0 our image is rotated wrong
+    private readonly BASE_ROTATION = 90 * Math.PI / 180;
 
     public preload() {
         this.load.image("dragon", "assets/dragon.png");
@@ -20,13 +26,14 @@ export class BattleScene extends Phaser.Scene {
     }
     
     public create() {
-        console.log('battle scene');
+        console.log('battle scene - radians');
 
         this.graphics = this.add.graphics();
 
         this.dragon = this.add.sprite(100, 100, "dragon");
         this.dragon.scale = 0.33;
-        this.dragon.angle = 90; // Use rotation for radians
+        //this.dragon.angle = 90; // Use rotation for radians
+        this.dragon.rotation = this.BASE_ROTATION;
 
         this.square = this.add.sprite(0, 0, "square");
         this.square.setInteractive();
@@ -60,7 +67,16 @@ export class BattleScene extends Phaser.Scene {
 
         if (this.path.length > 0) {
             let point = this.path.shift();
+
+            let center = this.dragon.getCenter();
+            let angle = this.angleBetween(center, point);
+
+            //console.log(`center=${center.x},${center.y} point=${point.x},${point.y} angle=${angle}`);
+            
             this.dragon.setPosition(point.x, point.y);
+            this.dragon.rotation = angle + this.BASE_ROTATION;
+            this.currentRotation = angle;
+
             if (this.path.length == 0) {
                 this.toggleOn();
             }
@@ -73,14 +89,25 @@ export class BattleScene extends Phaser.Scene {
     private toggleOn() {
         this.goButton.setVisible(true);
 
-        this.square.setPosition(this.dragon.x + 300, this.dragon.y);
+        const targetPos = this.findPointAtDistance(this.dragon.getCenter(), this.currentRotation, 300);
+        this.square.setPosition(targetPos.x, targetPos.y);
 
-        this.controlPoint = new Phaser.Math.Vector2(this.dragon.x + 150, this.dragon.y);
+        this.controlPoint = this.findPointAtDistance(this.dragon.getCenter(), this.currentRotation, 150);
         this.curve = new Phaser.Curves.QuadraticBezier(this.dragon.getCenter(),
                 this.controlPoint, this.square.getCenter());
     }
 
     private toggleOff() {
         this.goButton.setVisible(false);
+    }
+
+    private findPointAtDistance(basePoint: Vector2, angle: number, distance: number): Vector2 {
+        const x = Math.cos(angle) * distance;
+        const y = Math.sin(angle) * distance;
+        return new Phaser.Math.Vector2(basePoint.x + x, basePoint.y + y);
+    }
+
+    private angleBetween(a: Vector2, b: Vector2): number {
+        return Math.atan2(b.y - a.y, b.x - a.x);
     }
 }
