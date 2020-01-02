@@ -8,6 +8,7 @@ export class BattleScene extends Phaser.Scene {
 
     private dragon: Phaser.GameObjects.Sprite;
     private currentRotation = 0; 
+    private attackTimer = 0;
 
     private graphics: Phaser.GameObjects.Graphics;
     private square: Phaser.GameObjects.Sprite;
@@ -34,6 +35,7 @@ export class BattleScene extends Phaser.Scene {
     private readonly THIRTY_DEGREES = 30 * Math.PI / 180;
 
     public preload() {
+        this.load.image("spear", "assets/spear.png")
         this.load.image("dragon", "assets/dragon.png");
         this.load.image("square", "assets/square.png");
         this.load.image("goButton", "assets/btn1.png");
@@ -45,6 +47,8 @@ export class BattleScene extends Phaser.Scene {
 
         this.keyUp = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
         this.keyDown = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+        this.keyLeft = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
+        this.keyRight = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
 
         this.graphics = this.add.graphics();
 
@@ -81,30 +85,36 @@ export class BattleScene extends Phaser.Scene {
 
         this.goButton = this.add.sprite(600, 450, "goButton");
         this.goButton.setInteractive();
+        this.goButton.setScrollFactor(0);
 
         this.goButton.on('pointerdown', () => {
             console.log("go button clicked");
-            this.path = this.curve.getPoints(30);
+            this.path = this.curve.getPoints(60);
             console.log(`len = ${this.path.length}`);
             this.toggleOff();
         });
 
-        this.target = this.add.sprite(350, 350, "target");
+        this.spawnTarget();
 
         this.toggleOn();
     }
 
     public update() {
         if (this.keyUp.isDown) {
-            console.log("Up is pressed");
             this.cameras.main.scrollY -= 5;
         }
 
         if (this.keyDown.isDown) {
-            console.log("Down is pressed");
             this.cameras.main.scrollY += 5;
         }
 
+        if (this.keyLeft.isDown) {
+            this.cameras.main.scrollX -= 5;
+        }
+
+        if (this.keyRight.isDown) {
+            this.cameras.main.scrollX += 5;
+        }
 
         this.graphics.clear();
 
@@ -113,12 +123,17 @@ export class BattleScene extends Phaser.Scene {
 
             let center = this.dragon.getCenter();
             let angle = this.angleBetween(center, point);
-
-            //console.log(`center=${center.x},${center.y} point=${point.x},${point.y} angle=${angle}`);
             
             this.dragon.setPosition(point.x, point.y);
             this.dragon.rotation = angle + this.BASE_ROTATION;
             this.currentRotation = angle;
+
+            if (this.attackTimer > 0) {
+                console.log(`attackTimer=${this.attackTimer}`);
+                this.attackTimer--;
+            } else {
+                this.checkTarget();
+            }
 
             this.updateFieldOfView();
 
@@ -154,13 +169,49 @@ export class BattleScene extends Phaser.Scene {
 
         this.line3.setTo(left.x, left.y, right.x, right.y);
 
-        const straight = this.findPointAtDistance(from, this.currentRotation, 450);
-        this.line4.setTo(from.x, from.y, straight.x, straight.y);
+        //const straight = this.findPointAtDistance(from, this.currentRotation, 450);
+        //this.line4.setTo(from.x, from.y, straight.x, straight.y);
+    }
+
+    private checkTarget() {
+        const from = this.dragon.getCenter();
+        const left = this.findPointAtDistance(from, this.currentRotation - this.THIRTY_DEGREES, 450);
+        const right = this.findPointAtDistance(from, this.currentRotation + this.THIRTY_DEGREES, 450);
 
         const targetPos = this.target.getCenter();
 
         const isSeen = this.pointInTriangle(targetPos, from, left, right);
-        console.log(`can see the target=${isSeen}`);
+        if (isSeen && this.attackTimer <= 0)  {
+            this.createAutoAttack(from, targetPos);
+            this.attackTimer = 15;
+        }
+    }
+
+    private createAutoAttack(start: Vector2, end: Vector2) {
+        const spear = this.add.image(start.x, start.y, "spear");
+
+        let rotation = this.angleBetween(start, end);
+        spear.rotation = rotation;
+
+        // Probably don't want a tween...
+        this.tweens.add({
+            targets: spear,
+            x: end.x,
+            y: end.y,
+            duration: 500,
+            onComplete: () => {
+                spear.destroy() 
+                this.target.destroy();
+                this.spawnTarget();
+            }
+        });
+    }
+
+    private spawnTarget() {
+        const x = Math.random() * 500;
+        const y = Math.random() * 500;
+
+        this.target = this.add.sprite(x, y, "target");
     }
 
     private toggleOff() {
