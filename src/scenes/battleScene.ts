@@ -19,8 +19,14 @@ export class BattleScene extends Phaser.Scene {
     private line1: Phaser.GameObjects.Line;
     private line2: Phaser.GameObjects.Line;
     private line3: Phaser.GameObjects.Line;
+    private line4: Phaser.GameObjects.Line;
 
     private target: Phaser.GameObjects.Sprite;
+
+    private keyUp: Phaser.Input.Keyboard.Key;
+    private keyDown: Phaser.Input.Keyboard.Key;
+    private keyLeft: Phaser.Input.Keyboard.Key;
+    private keyRight: Phaser.Input.Keyboard.Key;
 
     // Add 90 degrees because 0 our image is rotated wrong
     private readonly BASE_ROTATION = 90 * Math.PI / 180;
@@ -37,6 +43,9 @@ export class BattleScene extends Phaser.Scene {
     public create() {
         console.log('battle scene - radians');
 
+        this.keyUp = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+        this.keyDown = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+
         this.graphics = this.add.graphics();
 
         this.dragon = this.add.sprite(100, 100, "dragon");
@@ -52,6 +61,9 @@ export class BattleScene extends Phaser.Scene {
 
         this.line3 = this.add.line(0, 0, 0, 0, 0, 0, 0xFF0000);
         this.line3.setOrigin(0, 0);
+
+        this.line4 = this.add.line(0, 0, 0, 0, 0, 0, 0xFF0000);
+        this.line4.setOrigin(0, 0);
 
         this.square = this.add.sprite(0, 0, "square");
         this.square.setInteractive();
@@ -83,6 +95,17 @@ export class BattleScene extends Phaser.Scene {
     }
 
     public update() {
+        if (this.keyUp.isDown) {
+            console.log("Up is pressed");
+            this.cameras.main.scrollY -= 5;
+        }
+
+        if (this.keyDown.isDown) {
+            console.log("Down is pressed");
+            this.cameras.main.scrollY += 5;
+        }
+
+
         this.graphics.clear();
 
         if (this.path.length > 0) {
@@ -130,6 +153,9 @@ export class BattleScene extends Phaser.Scene {
         this.line2.setTo(from.x, from.y, right.x, right.y);
 
         this.line3.setTo(left.x, left.y, right.x, right.y);
+
+        const straight = this.findPointAtDistance(from, this.currentRotation, 450);
+        this.line4.setTo(from.x, from.y, straight.x, straight.y);
 
         const targetPos = this.target.getCenter();
 
