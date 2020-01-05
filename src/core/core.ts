@@ -7,10 +7,19 @@
 // TODO: just using Phaser Vector and Bezier Curves for now I guess :-(
 type Vector2 = Phaser.Math.Vector2;
 
+export const TWO_PI = 2 * Math.PI;
+
 export const THIRTY_DEGREES = 30 * Math.PI / 180;
 
 export function angleBetween(a: Vector2, b: Vector2): number {
-    return Math.atan2(b.y - a.y, b.x - a.x);
+    const result =  Math.atan2(b.y - a.y, b.x - a.x);
+    return normalizeRadians(result);
+}
+
+export function distanceBetween(a: Vector2, b: Vector2): number {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    return Math.sqrt(dx * dx + dy * dy);
 }
 
 export function findPointAtDistance(basePoint: Vector2, angle: number, distance: number): Vector2 {
@@ -18,6 +27,27 @@ export function findPointAtDistance(basePoint: Vector2, angle: number, distance:
     const y = Math.sin(angle) * distance;
     return new Phaser.Math.Vector2(basePoint.x + x, basePoint.y + y);
 }
+
+export function pointIsWithinAngle(basePoint: Vector2, target: Vector2, lowerAngle: number, upperAngle: number): boolean {
+    const angle = angleBetween(basePoint, target);
+
+    lowerAngle = normalizeRadians(lowerAngle);
+    upperAngle = normalizeRadians(upperAngle);
+
+    console.log(`Angle = ${angle} lower = ${lowerAngle}, upper = ${upperAngle}`)
+    return (angle > lowerAngle) && (angle < upperAngle);
+}
+
+export function normalizeRadians(radians: number): number {
+    return radians - (TWO_PI * Math.floor(radians / TWO_PI));
+}
+
+
+
+
+
+
+
 
 // Check out Barycentric coordinate system for maybe a more efficient check?
 // Probably uneeded?

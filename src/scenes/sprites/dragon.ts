@@ -88,7 +88,7 @@ export class Dragon {
         let center = this.dragon.getCenter();
         let angle = Core.angleBetween(center, point);
 
-        console.log(`Current=${this.vecToString(center)}, New=${this.vecToString(point)}, Angle=${angle}`)
+        // console.log(`Current=${this.vecToString(center)}, New=${this.vecToString(point)}, Angle=${angle}`)
         
         this.dragon.setPosition(point.x, point.y);
         this.currentRotation = angle;
@@ -105,19 +105,30 @@ export class Dragon {
 
     private checkTarget(target: Dragon) {
         const from = this.dragon.getCenter();
-        const left = Core.findPointAtDistance(from, this.currentRotation - Core.THIRTY_DEGREES, 450);
-        const right = Core.findPointAtDistance(from, this.currentRotation + Core.THIRTY_DEGREES, 450);
+        const to = target.getCenter();
 
-        const targetPos = target.getCenter();
+        const isInRange = this.checkInRange(target.getCenter());
 
-        const isSeen = Core.pointInTriangle(targetPos, from, left, right);
-        if (isSeen && this.attackTimer <= 0)  {
-            console.log(`Auto Attack on target at:(${targetPos.x},${targetPos.y}), 
-                    from:(${from.x},${from.y}) with rotation:${this.currentRotation}`);
+        if (isInRange && this.attackTimer <= 0)  {
+            console.log(`Auto Attack on target at:${this.vecToString(to)}, 
+                    from:${this.vecToString(from)} with rotation:${this.currentRotation}`);
 
-            this.createAutoAttack(from, targetPos);
+            this.createAutoAttack(from, to);
             this.attackTimer = 30;
         }
+    }
+
+    public checkInRange(targetPoint: Vector2): boolean {
+        const from = this.dragon.getCenter();
+
+        const lowerAngle = this.currentRotation - Core.THIRTY_DEGREES;
+        const upperAngle = this.currentRotation + Core.THIRTY_DEGREES;
+
+        if (Core.pointIsWithinAngle(from, targetPoint, lowerAngle, upperAngle)) {
+            return Core.distanceBetween(from, targetPoint) <= 450;
+        }
+
+        return false;
     }
 
     private createAutoAttack(start: Vector2, end: Vector2) {
