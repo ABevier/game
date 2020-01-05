@@ -37,14 +37,14 @@ export class Dragon {
 
         this.lineLower = scene.add.line(0, 0, 0, 0, 0, 0, 0xFF0000)
                 .setOrigin(0, 0)
-                .setAlpha(0.5);
+                .setAlpha(0.2);
 
         this.lineUpper = scene.add.line(0, 0, 0, 0, 0, 0, 0xFF0000)
                 .setOrigin(0, 0)
-                .setAlpha(0.5);
+                .setAlpha(0.2);
 
         this.arc = scene.add.arc()
-                .setAlpha(0.5);
+                .setAlpha(0.2);
         this.arc.isStroked = true;
         this.arc.strokeColor = 0xFF0000;
         this.arc.closePath = false;
@@ -65,6 +65,10 @@ export class Dragon {
         });
     }
 
+    public getCenter(): Vector2 {
+        return this.dragon.getCenter();
+    }
+
     public generatePath(numFrames: number) {
             this.path = this.curve.getPoints(numFrames);
             // this is a hack.  It drops the first point since it's where we are anyways
@@ -74,11 +78,11 @@ export class Dragon {
     }
 
     public updateIdle(graphics: Phaser.GameObjects.Graphics) {
-        graphics.lineStyle(1, 0xFF00FF, 1);
+        graphics.lineStyle(1, 0xFF00FF, 0.5);
         this.curve.draw(graphics);
     }
 
-    public update(target: Phaser.GameObjects.Sprite) {
+    public update(target: Dragon) {
         let point = this.path.shift();
 
         let center = this.dragon.getCenter();
@@ -99,7 +103,7 @@ export class Dragon {
         this.updateFieldOfView();
     }
 
-    private checkTarget(target: Phaser.GameObjects.Sprite) {
+    private checkTarget(target: Dragon) {
         const from = this.dragon.getCenter();
         const left = Core.findPointAtDistance(from, this.currentRotation - Core.THIRTY_DEGREES, 450);
         const right = Core.findPointAtDistance(from, this.currentRotation + Core.THIRTY_DEGREES, 450);
@@ -111,36 +115,31 @@ export class Dragon {
             console.log(`Auto Attack on target at:(${targetPos.x},${targetPos.y}), 
                     from:(${from.x},${from.y}) with rotation:${this.currentRotation}`);
 
-            this.createAutoAttack(from, targetPos, target);
+            this.createAutoAttack(from, targetPos);
             this.attackTimer = 30;
         }
     }
 
-    private createAutoAttack(start: Vector2, end: Vector2, target: Phaser.GameObjects.Sprite) {
+    private createAutoAttack(start: Vector2, end: Vector2) {
         const spear = this.battleScene.add.image(start.x, start.y, "spear");
 
         let rotation = Core.angleBetween(start, end);
         spear.rotation = rotation;
 
-        // Probably don't want a tween...
+        // TODO: definately don't want a tween...
         this.battleScene.tweens.add({
             targets: spear,
             x: end.x,
             y: end.y,
-            duration: 500,
+            duration: 350,
             onComplete: () => {
                 spear.destroy() 
-                if (target.active) {
-                    target.destroy();
-                    this.battleScene.spawnTarget();
-                }
             }
         });
     }
 
     public setToIdleMode() {
         const targetPos = Core.findPointAtDistance(this.dragon.getCenter(), this.currentRotation, 300);
-        console.log(`Set target to: ${this.vecToString(targetPos)}`)
         this.square.setPosition(targetPos.x, targetPos.y);
 
         this.controlPoint = Core.findPointAtDistance(this.dragon.getCenter(), this.currentRotation, 150);

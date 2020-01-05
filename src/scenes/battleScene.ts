@@ -12,8 +12,6 @@ export class BattleScene extends Phaser.Scene {
 
     private graphics: Phaser.GameObjects.Graphics;
 
-    private target: Phaser.GameObjects.Sprite;
-
     private keyUp: Phaser.Input.Keyboard.Key;
     private keyDown: Phaser.Input.Keyboard.Key;
     private keyLeft: Phaser.Input.Keyboard.Key;
@@ -26,7 +24,6 @@ export class BattleScene extends Phaser.Scene {
         this.load.image("dragon", "assets/dragon.png");
         this.load.image("square", "assets/square.png");
         this.load.image("goButton", "assets/btn1.png");
-        this.load.image("target", "assets/target.png");
     }
     
     public create() {
@@ -53,8 +50,6 @@ export class BattleScene extends Phaser.Scene {
             this.toggleOff();
         });
 
-        this.spawnTarget();
-
         this.toggleOn();
     }
 
@@ -78,9 +73,9 @@ export class BattleScene extends Phaser.Scene {
         this.graphics.clear();
 
         if (this.frameCount > 0) {
-            this.dragon1.update(this.target);
-            this.dragon2.update(this.target);
-
+            this.dragon1.update(this.dragon2);
+            this.dragon2.update(this.dragon1); 
+     
             this.frameCount--;
             if (this.frameCount <= 0) {
                 this.toggleOn();
@@ -95,13 +90,6 @@ export class BattleScene extends Phaser.Scene {
         this.dragon1.setToIdleMode();
         this.dragon2.setToIdleMode();
         this.goButton.setVisible(true);
-    }
-
-    public spawnTarget() {
-        const x = Math.random() * 500;
-        const y = Math.random() * 500;
-
-        this.target = this.add.sprite(x, y, "target");
     }
 
     private toggleOff() {
