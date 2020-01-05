@@ -19,10 +19,9 @@ export class Dragon {
     private controlPoint: Phaser.Math.Vector2;
 
     // Debug lines
-    private line1: Phaser.GameObjects.Line;
-    private line2: Phaser.GameObjects.Line;
-    private line3: Phaser.GameObjects.Line;
-    private line4: Phaser.GameObjects.Line;
+    private lineLower: Phaser.GameObjects.Line;
+    private lineUpper: Phaser.GameObjects.Line;
+    private arc: Phaser.GameObjects.Arc;
 
     private path: Vector2[] = [];
 
@@ -35,17 +34,19 @@ export class Dragon {
         this.dragon.scale = 0.33;
         this.dragon.rotation = this.BASE_ROTATION;
 
-        this.line1 = scene.add.line(0, 0, 0, 0, 0, 0, 0xFF0000);
-        this.line1.setOrigin(0, 0);
+        this.lineLower = scene.add.line(0, 0, 0, 0, 0, 0, 0xFF0000)
+                .setOrigin(0, 0)
+                .setAlpha(0.5);
 
-        this.line2 = scene.add.line(0, 0, 0, 0, 0, 0, 0xFF0000);
-        this.line2.setOrigin(0, 0);
+        this.lineUpper = scene.add.line(0, 0, 0, 0, 0, 0, 0xFF0000)
+                .setOrigin(0, 0)
+                .setAlpha(0.5);
 
-        this.line3 = scene.add.line(0, 0, 0, 0, 0, 0, 0xFF0000);
-        this.line3.setOrigin(0, 0);
-
-        this.line4 = scene.add.line(0, 0, 0, 0, 0, 0, 0xFF0000);
-        this.line4.setOrigin(0, 0);
+        this.arc = scene.add.arc()
+                .setAlpha(0.5);
+        this.arc.isStroked = true;
+        this.arc.strokeColor = 0xFF0000;
+        this.arc.closePath = false;
 
         this.square = scene.add.sprite(0, 0, "square");
         this.square.setInteractive();
@@ -63,7 +64,10 @@ export class Dragon {
     }
 
     public generatePath(numFrames: number) {
-            this.path = this.curve.getPoints(numFrames - 1);
+            this.path = this.curve.getPoints(numFrames);
+            // this is a hack.  It drops the first point since it's where we are anyways
+            // also getPoints returns numFrames + 1 points anyways
+            this.path.shift(); 
             console.log(`len = ${this.path.length}`);
     }
 
@@ -77,6 +81,8 @@ export class Dragon {
 
         let center = this.dragon.getCenter();
         let angle = Core.angleBetween(center, point);
+
+        console.log(`Current=${this.vecToString(center)}, New=${this.vecToString(point)}, Angle=${angle}`)
         
         this.dragon.setPosition(point.x, point.y);
         this.currentRotation = angle;
@@ -102,6 +108,7 @@ export class Dragon {
         if (isSeen && this.attackTimer <= 0)  {
             console.log(`Auto Attack on target at:(${targetPos.x},${targetPos.y}), 
                     from:(${from.x},${from.y}) with rotation:${this.currentRotation}`);
+
             this.createAutoAttack(from, targetPos, target);
             this.attackTimer = 30;
         }
@@ -142,15 +149,27 @@ export class Dragon {
     public updateFieldOfView() {
         const from = this.dragon.getCenter();
 
-        const left = Core.findPointAtDistance(from, this.currentRotation - Core.THIRTY_DEGREES, 450);
-        this.line1.setTo(from.x, from.y, left.x, left.y);
+        const range = 450;
 
-        const right = Core.findPointAtDistance(from, this.currentRotation + Core.THIRTY_DEGREES, 450);
-        this.line2.setTo(from.x, from.y, right.x, right.y);
+        const lowerAngle = this.currentRotation - Core.THIRTY_DEGREES;
+        const lowerPoint = Core.findPointAtDistance(from, lowerAngle, range);
+        this.lineLower.setTo(from.x, from.y, lowerPoint.x, lowerPoint.y);
 
-        this.line3.setTo(left.x, left.y, right.x, right.y);
+        const upperAngle = this.currentRotation + Core.THIRTY_DEGREES;
+        const upperPoint = Core.findPointAtDistance(from, upperAngle, 450);
+        this.lineUpper.setTo(from.x, from.y, upperPoint.x, upperPoint.y);
 
-        //const straight = this.findPointAtDistance(from, this.currentRotation, 450);
-        //this.line4.setTo(from.x, from.y, straight.x, straight.y);
+        this.arc.setStartAngle(this.radToDeg(lowerAngle))
+            .setRadius(range)
+            .setEndAngle(this.radToDeg(upperAngle))
+            .setPosition(from.x, from.y);
+    }
+
+    private radToDeg(radians: number): number {
+        return radians * (180 / Math.PI);
+    }
+
+    private vecToString(vector: Vector2): string {
+        return `(${vector.x},${vector.y})`
     }
 }
