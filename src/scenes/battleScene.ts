@@ -7,7 +7,8 @@ export class BattleScene extends Phaser.Scene {
 
     private goButton: Phaser.GameObjects.Sprite;
 
-    private dragon: Dragon;
+    private dragon1: Dragon;
+    private dragon2: Dragon;
 
     private graphics: Phaser.GameObjects.Graphics;
 
@@ -29,8 +30,6 @@ export class BattleScene extends Phaser.Scene {
     }
     
     public create() {
-        console.log('battle scene - radians');
-
         this.keyUp = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
         this.keyDown = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
         this.keyLeft = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
@@ -38,15 +37,18 @@ export class BattleScene extends Phaser.Scene {
 
         this.graphics = this.add.graphics();
 
-        this.dragon = new Dragon(this);
+        this.dragon1 = new Dragon(this, new Phaser.Math.Vector2(100, 200), 0);
+        this.dragon2 = new Dragon(this, new Phaser.Math.Vector2(800, 200), Math.PI);
 
-        this.goButton = this.add.sprite(600, 450, "goButton");
+        this.goButton = this.add.sprite(100, 480, "goButton");
+        this.goButton.setScale(2, 2);
         this.goButton.setInteractive();
         this.goButton.setScrollFactor(0);
 
         this.goButton.on('pointerdown', () => {
             console.log("go button clicked");
-            this.dragon.generatePath(60);
+            this.dragon1.generatePath(60);
+            this.dragon2.generatePath(60);
             this.frameCount = 60;
             this.toggleOff();
         });
@@ -76,19 +78,22 @@ export class BattleScene extends Phaser.Scene {
         this.graphics.clear();
 
         if (this.frameCount > 0) {
-            this.dragon.update(this.target);
+            this.dragon1.update(this.target);
+            this.dragon2.update(this.target);
 
             this.frameCount--;
             if (this.frameCount <= 0) {
                 this.toggleOn();
             }
         } else {
-            this.dragon.updateIdle(this.graphics);
+            this.dragon1.updateIdle(this.graphics);
+            this.dragon2.updateIdle(this.graphics);
         }
     }
 
     private toggleOn() {
-        this.dragon.setToIdleMode();
+        this.dragon1.setToIdleMode();
+        this.dragon2.setToIdleMode();
         this.goButton.setVisible(true);
     }
 

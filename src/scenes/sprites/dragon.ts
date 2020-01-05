@@ -27,12 +27,13 @@ export class Dragon {
 
     private battleScene: BattleScene;
 
-    constructor(scene: BattleScene) {
+    constructor(scene: BattleScene, initialPosition: Vector2, initalRotation: number) {
         this.battleScene = scene;
 
-        this.dragon = scene.add.sprite(100, 100, "dragon");
+        this.dragon = scene.add.sprite(initialPosition.x, initialPosition.y, "dragon");
         this.dragon.scale = 0.33;
-        this.dragon.rotation = this.BASE_ROTATION;
+        this.currentRotation = initalRotation;
+        this.dragon.rotation = this.BASE_ROTATION + initalRotation;
 
         this.lineLower = scene.add.line(0, 0, 0, 0, 0, 0, 0xFF0000)
                 .setOrigin(0, 0)
@@ -59,6 +60,7 @@ export class Dragon {
         scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
             gameObject.x = dragX;
             gameObject.y = dragY;
+            //FIX ME - how does this even work now??
             this.curve = new Phaser.Curves.QuadraticBezier(this.dragon.getCenter(), this.controlPoint, this.square.getCenter());
         });
     }
@@ -138,6 +140,7 @@ export class Dragon {
 
     public setToIdleMode() {
         const targetPos = Core.findPointAtDistance(this.dragon.getCenter(), this.currentRotation, 300);
+        console.log(`Set target to: ${this.vecToString(targetPos)}`)
         this.square.setPosition(targetPos.x, targetPos.y);
 
         this.controlPoint = Core.findPointAtDistance(this.dragon.getCenter(), this.currentRotation, 150);
