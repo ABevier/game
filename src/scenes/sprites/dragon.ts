@@ -121,10 +121,13 @@ export class Dragon {
     public checkInRange(targetPoint: Vector2): boolean {
         const from = this.dragon.getCenter();
 
-        const lowerAngle = this.currentRotation - Core.THIRTY_DEGREES;
-        const upperAngle = this.currentRotation + Core.THIRTY_DEGREES;
+        const lowerAngle = Core.normalizeRadians(this.currentRotation - Core.THIRTY_DEGREES);
+        const upperAngle = Core.normalizeRadians(this.currentRotation + Core.THIRTY_DEGREES);
 
-        if (Core.pointIsWithinAngle(from, targetPoint, lowerAngle, upperAngle)) {
+        const targetAngle = Core.angleBetween(from, targetPoint);
+
+        //if (Core.pointIsWithinAngle(from, targetPoint, lowerAngle, upperAngle)) {
+        if (Core.isAngleBetween(targetAngle, lowerAngle, upperAngle)) {
             return Core.distanceBetween(from, targetPoint) <= 450;
         }
 

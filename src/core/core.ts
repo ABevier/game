@@ -28,22 +28,34 @@ export function findPointAtDistance(basePoint: Vector2, angle: number, distance:
     return new Phaser.Math.Vector2(basePoint.x + x, basePoint.y + y);
 }
 
-export function pointIsWithinAngle(basePoint: Vector2, target: Vector2, lowerAngle: number, upperAngle: number): boolean {
-    const angle = angleBetween(basePoint, target);
+// TODO: unit test this
+// Assumes target is normalized
+// only works for less than 180 degrees
+export function isAngleBetween(target: number, angle1: number, angle2: number) {
+    console.log(`Angle = ${target} lower = ${angle1}, upper = ${angle2}`)
 
-    lowerAngle = normalizeRadians(lowerAngle);
-    upperAngle = normalizeRadians(upperAngle);
+    // swap the angles if necessary to get the difference less than 180 degrees
+    const rAngle = normalizeRadians(angle2 - angle1);
+    if (rAngle >= Math.PI) {
+        let swap = angle1
+        angle1 = angle2
+        angle2 = swap
+    }
 
-    console.log(`Angle = ${angle} lower = ${lowerAngle}, upper = ${upperAngle}`)
-    return (angle > lowerAngle) && (angle < upperAngle);
+    if (angle1 <= angle2) {
+        return target >= angle1 && target <= angle2
+    } else {
+        return target >= angle1 || target <= angle2
+    }
 }
 
 export function normalizeRadians(radians: number): number {
     return radians - (TWO_PI * Math.floor(radians / TWO_PI));
+    // Or could use mod (but use it twice)
 }
 
 
-
+// https://github.com/davidfig/angle/blob/master/index.js
 
 
 
