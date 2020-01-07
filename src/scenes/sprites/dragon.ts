@@ -113,7 +113,7 @@ export class Dragon {
             console.log(`Auto Attack on target at:${this.vecToString(to)}, 
                     from:${this.vecToString(from)} with rotation:${this.currentRotation}`);
 
-            this.createAutoAttack(from, to);
+            this.createAutoAttack(from, to, target);
             this.attackTimer = 30;
         }
     }
@@ -134,22 +134,8 @@ export class Dragon {
         return false;
     }
 
-    private createAutoAttack(start: Vector2, end: Vector2) {
-        const spear = this.battleScene.add.image(start.x, start.y, "spear");
-
-        let rotation = Core.angleBetween(start, end);
-        spear.rotation = rotation;
-
-        // TODO: definately don't want a tween...
-        this.battleScene.tweens.add({
-            targets: spear,
-            x: end.x,
-            y: end.y,
-            duration: 350,
-            onComplete: () => {
-                spear.destroy() 
-            }
-        });
+    private createAutoAttack(start: Vector2, end: Vector2, target: Dragon) {
+        this.battleScene.addAutoAttack(this, target);
     }
 
     public setToIdleMode() {

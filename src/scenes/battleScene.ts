@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import { Dragon } from './sprites/dragon';
+import { AutoAttack} from './sprites/autoAttack';
 
 type Vector2 = Phaser.Math.Vector2;
 
@@ -9,6 +10,8 @@ export class BattleScene extends Phaser.Scene {
 
     private dragon1: Dragon;
     private dragon2: Dragon;
+
+    private autoAttacks: AutoAttack[] = [];
 
     private graphics: Phaser.GameObjects.Graphics;
 
@@ -75,6 +78,8 @@ export class BattleScene extends Phaser.Scene {
         if (this.frameCount > 0) {
             this.dragon1.update(this.dragon2);
             this.dragon2.update(this.dragon1); 
+
+            this.autoAttacks.forEach(attack => attack.update());
      
             this.frameCount--;
             if (this.frameCount <= 0) {
@@ -94,5 +99,20 @@ export class BattleScene extends Phaser.Scene {
 
     private toggleOff() {
         this.goButton.setVisible(false);
+    }
+
+    public addAutoAttack(source: Dragon, target: Dragon) {
+        const from = source.getCenter();
+        const attack = new AutoAttack(this, target, from.x, from.y);
+        this.autoAttacks.push(attack);
+    }
+
+    public destroyAutoAttack(attack: AutoAttack) {
+        //TODO: this is probably gross?
+        const idx = this.autoAttacks.indexOf(attack);
+        if (idx >= 0) {
+            console.log("remove auto attack");
+            this.autoAttacks.splice(idx, 1);
+        }
     }
 }
