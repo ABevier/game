@@ -7,9 +7,13 @@ type Vector2 = Phaser.Math.Vector2;
 export class BattleScene extends Phaser.Scene {
 
     private goButton: Phaser.GameObjects.Sprite;
+    
+    private debugButton: Phaser.GameObjects.Sprite;
+    public debugMode = false;
 
-    private dragon1: Dragon;
-    private dragon2: Dragon;
+    private dragonTeamA: Dragon[];
+    private dragonTeamB: Dragon[];
+    private allDragons: Dragon[];
 
     private autoAttacks: AutoAttack[] = [];
 
@@ -37,8 +41,19 @@ export class BattleScene extends Phaser.Scene {
 
         this.graphics = this.add.graphics();
 
-        this.dragon1 = new Dragon(this, new Phaser.Math.Vector2(100, 200), 0);
-        this.dragon2 = new Dragon(this, new Phaser.Math.Vector2(800, 200), Math.PI);
+        this.dragonTeamA = [
+            new Dragon(this, "a1", new Phaser.Math.Vector2(100, 150), 0),
+            new Dragon(this, "a2", new Phaser.Math.Vector2(150, 200), 0),
+            new Dragon(this, "a3", new Phaser.Math.Vector2(100, 250), 0)
+        ];
+
+        this.dragonTeamB = [
+            new Dragon(this, "b1", new Phaser.Math.Vector2(1000, 150), Math.PI),
+            new Dragon(this, "b2", new Phaser.Math.Vector2(950, 200), Math.PI),
+            new Dragon(this, "b3", new Phaser.Math.Vector2(1000, 250), Math.PI)
+        ];
+
+        this.allDragons = [...this.dragonTeamA, ...this.dragonTeamB];
 
         this.goButton = this.add.sprite(100, 480, "goButton");
         this.goButton.setScale(2, 2);
@@ -47,11 +62,26 @@ export class BattleScene extends Phaser.Scene {
 
         this.goButton.on('pointerdown', () => {
             console.log("go button clicked");
-            this.dragon1.generatePath(60);
-            this.dragon2.generatePath(60);
             this.frameCount = 60;
+            this.allDragons.forEach(dragon => dragon.generatePath(this.frameCount));
             this.toggleOff();
         });
+
+        this.debugButton = this.add.sprite(1000, 480, "goButton")
+            .setScale(2, 2)
+            .setInteractive()
+            .setScrollFactor(0);
+
+        const toggleDebugFn = () => {
+            this.allDragons.forEach(dragon => dragon.toggleDebug(this.debugMode));
+        };
+
+        this.debugButton.on('pointerdown', () => {
+            this.debugMode = !this.debugMode;
+            toggleDebugFn();
+        });
+
+        toggleDebugFn();
 
         this.toggleOn();
     }
@@ -76,8 +106,8 @@ export class BattleScene extends Phaser.Scene {
         this.graphics.clear();
 
         if (this.frameCount > 0) {
-            this.dragon1.update(this.dragon2);
-            this.dragon2.update(this.dragon1); 
+            this.dragonTeamA.forEach(dragon => dragon.update(this.dragonTeamB));
+            this.dragonTeamB.forEach(dragon => dragon.update(this.dragonTeamA));
 
             this.autoAttacks.forEach(attack => attack.update());
      
@@ -86,14 +116,12 @@ export class BattleScene extends Phaser.Scene {
                 this.toggleOn();
             }
         } else {
-            this.dragon1.updateIdle(this.graphics);
-            this.dragon2.updateIdle(this.graphics);
+            this.allDragons.forEach(dragon => dragon.updateIdle(this.graphics));
         }
     }
 
     private toggleOn() {
-        this.dragon1.setToIdleMode();
-        this.dragon2.setToIdleMode();
+        this.allDragons.forEach(dragon => dragon.setToIdleMode());
         this.goButton.setVisible(true);
     }
 

@@ -25,11 +25,7 @@ export class Dragon {
 
     private path: Vector2[] = [];
 
-    private battleScene: BattleScene;
-
-    constructor(scene: BattleScene, initialPosition: Vector2, initalRotation: number) {
-        this.battleScene = scene;
-
+    constructor(private scene: BattleScene, public id: string, initialPosition: Vector2, initalRotation: number) {
         this.dragon = scene.add.sprite(initialPosition.x, initialPosition.y, "dragon");
         this.dragon.scale = 0.33;
         this.currentRotation = initalRotation;
@@ -75,6 +71,9 @@ export class Dragon {
             // also getPoints returns numFrames + 1 points anyways
             this.path.shift(); 
             console.log(`len = ${this.path.length}`);
+
+            //this is hacky too
+            this.square.visible = false;
     }
 
     public updateIdle(graphics: Phaser.GameObjects.Graphics) {
@@ -82,7 +81,7 @@ export class Dragon {
         this.curve.draw(graphics);
     }
 
-    public update(target: Dragon) {
+    public update(targets: Dragon[]) {
         let point = this.path.shift();
 
         let center = this.dragon.getCenter();
@@ -97,7 +96,7 @@ export class Dragon {
         if (this.attackTimer > 0) {
             this.attackTimer--;
         } else {
-            this.checkTarget(target);
+            targets.forEach(target => this.checkTarget(target));
         }
 
         this.updateFieldOfView();
@@ -110,7 +109,7 @@ export class Dragon {
         const isInRange = this.checkInRange(target.getCenter());
 
         if (isInRange && this.attackTimer <= 0)  {
-            console.log(`Auto Attack on target at:${this.vecToString(to)}, 
+            console.log(`${this.id}: auto Attack on target ${target.id} at:${this.vecToString(to)}, 
                     from:${this.vecToString(from)} with rotation:${this.currentRotation}`);
 
             this.createAutoAttack(from, to, target);
@@ -135,16 +134,18 @@ export class Dragon {
     }
 
     private createAutoAttack(start: Vector2, end: Vector2, target: Dragon) {
-        this.battleScene.addAutoAttack(this, target);
+        this.scene.addAutoAttack(this, target);
     }
 
     public setToIdleMode() {
+        this.square.visible = true;
+        
         const targetPos = Core.findPointAtDistance(this.dragon.getCenter(), this.currentRotation, 300);
         this.square.setPosition(targetPos.x, targetPos.y);
 
         this.controlPoint = Core.findPointAtDistance(this.dragon.getCenter(), this.currentRotation, 150);
         this.curve = new Phaser.Curves.QuadraticBezier(this.dragon.getCenter(), this.controlPoint, this.square.getCenter());
-        
+
         this.updateFieldOfView();
     }
 
@@ -165,6 +166,12 @@ export class Dragon {
             .setRadius(range)
             .setEndAngle(this.radToDeg(upperAngle))
             .setPosition(from.x, from.y);
+    }
+
+    public toggleDebug(mode: boolean) {
+        this.lineLower.visible = mode;
+        this.lineUpper.visible = mode;
+        this.arc.visible = mode;
     }
 
     private radToDeg(radians: number): number {

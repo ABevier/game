@@ -32,7 +32,7 @@ export function findPointAtDistance(basePoint: Vector2, angle: number, distance:
 // Assumes target is normalized
 // only works for less than 180 degrees
 export function isAngleBetween(target: number, angle1: number, angle2: number) {
-    console.log(`Angle = ${target} lower = ${angle1}, upper = ${angle2}`)
+    // console.log(`Angle = ${target} lower = ${angle1}, upper = ${angle2}`)
 
     // swap the angles if necessary to get the difference less than 180 degrees
     const rAngle = normalizeRadians(angle2 - angle1);
