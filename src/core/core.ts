@@ -10,6 +10,7 @@ type Vector2 = Phaser.Math.Vector2;
 export const TWO_PI = 2 * Math.PI;
 
 export const THIRTY_DEGREES = 30 * Math.PI / 180;
+export const NINETY_DEGRESS = 90 * Math.PI / 180;
 
 export function angleBetween(a: Vector2, b: Vector2): number {
     const result =  Math.atan2(b.y - a.y, b.x - a.x);

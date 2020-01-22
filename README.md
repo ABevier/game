@@ -16,6 +16,8 @@ TODO:
 - Spells
 - Melee?
 
+- Make Arrows lead a target so they don't look janky
+
 - DONE: add debug toggle for field of view
 - DONE: fix inRange check to not use triangles
 - DONE: Stop using tweens for auto attack - and make them follow the target?

@@ -1,6 +1,7 @@
 import * as Phaser from 'phaser';
 import { Dragon } from './sprites/dragon';
 import { AutoAttack} from './sprites/autoAttack';
+import * as Core from '../core/core';
 
 type Vector2 = Phaser.Math.Vector2;
 
@@ -31,6 +32,7 @@ export class BattleScene extends Phaser.Scene {
         this.load.image("dragon", "assets/dragon.png");
         this.load.image("square", "assets/square.png");
         this.load.image("goButton", "assets/btn1.png");
+        this.load.image("template", "assets/template.png");
     }
     
     public create() {
@@ -84,6 +86,19 @@ export class BattleScene extends Phaser.Scene {
         toggleDebugFn();
 
         this.toggleOn();
+
+        const template = this.add.sprite(100, 200, "template");
+        template.setInteractive();
+        this.input.setDraggable(template);
+
+        //TODO: gotta fix drags
+        this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+            gameObject.x = dragX;
+            gameObject.y = dragY;
+
+            const angle = Core.angleBetween(new Phaser.Math.Vector2(0, 0), template.getCenter());
+            template.setRotation(angle + Core.NINETY_DEGRESS);
+        });
     }
 
     public update() {
