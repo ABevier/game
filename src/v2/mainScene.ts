@@ -7,14 +7,13 @@ export class MainScene extends Phaser.Scene {
 
     public preload() {
         console.log("preload main scene");
-        this.load.image("hex", "assets/grassHex.png")
+        //this.load.image("hex", "assets/grassHex.png")
+        this.load.image("hex", "assets/hex.png")
     }
 
 
     public create() {
         console.log("create main scene");
-
-        //this.cameras.main.setZoom(0.5);
 
         this.text = this.add.text(10, 10, "pixel");
         this.posText = this.add.text(10, 25, "coord");
@@ -23,18 +22,26 @@ export class MainScene extends Phaser.Scene {
         let startX = 100;
         let startY = 100;
 
+        // 8 16 24 32
         // 18 36 54 72
+
+        //let offset = 54;
+        let offset = 50;
+
+        //let tileHeight = 72;
+        let tileHeight = 64;
 
         for (let y = 0; y < 8; y++) {
             for (let x = 0; x < 12; x++) {
-                let posX = startX + (x * 54);
-                let posY = startY + (y * 72);
+                let posX = startX + (x * offset);
+                let posY = startY + (y * tileHeight);
 
                 if (x % 2 !== 0) {
-                    posY += 36; // shift down half a "tile"
+                    posY += Math.floor(tileHeight / 2); // shift down half a "tile"
                 }
 
                 this.add.sprite(posX, posY, "hex")
+                    .setScale(2)
                     .setOrigin(0, 0);
             }
         }
@@ -58,7 +65,7 @@ export class MainScene extends Phaser.Scene {
 
         this.text.text = `pixel x: ${pX} y: ${pY}`;
 
-        this.magicFunction(pX - 100, pY - 100);
+        //this.magicFunction(pX - 100, pY - 100);
         this.magicFunction2(pX - 100, pY - 100);
     }
 
@@ -115,9 +122,8 @@ export class MainScene extends Phaser.Scene {
 
     private magicFunction2(mapX: number, mapY: number) {
 
-        const hexSize = 72;
-        const tilingWidth = Math.floor(hexSize * 3 / 2);
-        const tilingHeight = hexSize;
+        const tilingWidth = 64 + 50;
+        const tilingHeight = 64;
 
         let coordX = Math.floor(mapX / tilingWidth) * 2;
         const xMod = Math.floor(mapX % tilingWidth);
@@ -125,17 +131,17 @@ export class MainScene extends Phaser.Scene {
         let coordY = Math.floor(mapY / tilingHeight);
         const yMod = Math.floor(mapY % tilingHeight);
 
-        console.log(`xmod:${xMod} ymod:${yMod} hx:${coordX} hy:${coordY} tilingWidth: ${tilingWidth}`);
+        //console.log(`xmod:${xMod} ymod:${yMod} hx:${coordX} hy:${coordY} tilingWidth: ${tilingWidth}`);
 
-        if (yMod < tilingHeight / 2) {
+        if (yMod < Math.floor(tilingHeight / 2)) {
             //Top half of the "tile"
-            if (this.isLeft(18, 0, 0, 32, xMod, yMod)) {
+            if (this.isLeft(16, 0, 0, 32, xMod, yMod)) {
                 //It's to the left
                 coordX--;
                 coordY--;
                 
             }
-            else if (this.isLeft(54, 0, 70, 32, xMod, yMod)) {
+            else if (this.isLeft(48, 0, 64, 32, xMod, yMod)) {
                 // do nothing - it's in the main hex
             }
             else {
@@ -146,11 +152,11 @@ export class MainScene extends Phaser.Scene {
         }
         else {
             //bottom half of the "tile"
-            if ((xMod * 2 - (yMod - hexSize / 2)) < 0) {
+            if (this.isLeft(0, 32, 16, 64, xMod, yMod)) {
                 // It's to the left
                 coordX--;
             }
-            else if ((xMod * 2 + (yMod - hexSize / 2)) < hexSize * 2) {
+            else if (this.isLeft(64, 32, 48, 64, xMod, yMod)) {
                 // do nothing - it's in the main hex
             }
             else {
