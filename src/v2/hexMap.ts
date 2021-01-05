@@ -1,4 +1,6 @@
 //TODO: we need some unit tests on this guy, holy carp
+// This is an "odd-q" hexmap that uses "square hexes"
+// Square hexes have a width that that is divided in 4 parts: 1/4 space, 1/2 edge, 1/4 space
 class HexMap {
   private readonly xEdgeStart: number;
   private readonly xEdgeEnd: number;
@@ -102,23 +104,24 @@ class HexMap {
   }
 
   // This uses cross product to determine if a point is to the left or right or a line on the coordinate plane:
+  // The order of A and B doesn't matter
   // https://stackoverflow.com/questions/1560492/how-to-tell-whether-a-point-is-to-the-right-or-left-side-of-a-line#:~:text=Using%20the%20equation%20of%20the,point%20is%20on%20the%20line.
   private isLeft(a: Point, b: Point, c: Point): boolean {
     return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x) > 0;
   }
 }
 
-interface Point {
+export interface Point {
   x: number;
   y: number;
 }
 
-interface Coordinate {
+export interface Coordinate {
   x: number;
   y: number;
 }
 
-interface Pixel {
+export interface Pixel {
   x: number;
   y: number;
 }

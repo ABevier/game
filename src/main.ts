@@ -1,24 +1,28 @@
-import * as Phaser from 'phaser';
-import { MainScene } from './v2/MainScene';
+import * as Phaser from "phaser";
+import { MainScene } from "./v2/MainScene";
 
 const gameConfig: Phaser.Types.Core.GameConfig = {
-  title: 'Sample',
- 
+  title: "Sample",
+
   type: Phaser.AUTO,
- 
+
   width: window.innerWidth,
   height: window.innerHeight,
- 
+
+  render: {
+    antialias: false,
+  },
+
   physics: {
-    default: 'arcade',
+    default: "arcade",
     arcade: {
       debug: true,
     },
   },
- 
-  parent: 'game',
-  backgroundColor: '#000000',
-  scene: MainScene
+
+  parent: "game",
+  backgroundColor: "#000000",
+  scene: MainScene,
 };
- 
+
 export const game = new Phaser.Game(gameConfig);
