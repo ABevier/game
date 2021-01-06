@@ -35,12 +35,12 @@ class HexMap {
   }
 
   // Take an X,Y coord of a hex to a pixel on the map
-  public coordinateToPixel(x, y: number): Pixel {
-    let posX = x * this.xEdgeEnd;
-    let posY = y * this.tileHeight;
+  public offsetCoordinateToPixel(coord: OffsetCoord): Pixel {
+    let posX = coord.x * this.xEdgeEnd;
+    let posY = coord.y * this.tileHeight;
 
     // tiles with an odd X coordinate are shifted down by half a "tile"
-    if (x % 2 !== 0) {
+    if (coord.x % 2 !== 0) {
       posY += Math.floor(this.tileHeight / 2);
     }
 
@@ -49,7 +49,7 @@ class HexMap {
 
   //TODO: Unit test me please!!!
   // Given a pixel on the screen convert to a map coordinate
-  public pixelToCoordinate(pX: number, pY: number): Coordinate {
+  public pixelToOffsetCoordinate(pX: number, pY: number): OffsetCoord {
     //this function uses a "virtual tile" to find the x and y.  This is a repeating pattern that overlaps parts
     //of 5 hexes.  The virtual tile gives a starting point for the actual coordinate and is then offset
     //depening on where the point (xMod, yMod) falls within the virtual tile
@@ -116,7 +116,7 @@ export interface Point {
   y: number;
 }
 
-export interface Coordinate {
+export interface OffsetCoord {
   x: number;
   y: number;
 }

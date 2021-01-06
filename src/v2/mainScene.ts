@@ -1,6 +1,9 @@
-import HexMap, { Coordinate, Pixel } from "./hexMap";
+import { Game } from "phaser";
+import { GameState, Unit, UnitSpec } from "./gameState";
+import HexMap, { OffsetCoord, Pixel } from "./hexMap";
 import hexUtil from "./hexUtil";
 
+// hex tiles: https://opengameart.org/content/hex-tileset-pack
 // used Piskel (piskelappcom)
 
 export class MainScene extends Phaser.Scene {
@@ -8,6 +11,10 @@ export class MainScene extends Phaser.Scene {
   private posText: Phaser.GameObjects.Text;
 
   private hexMap: HexMap;
+
+  private gameState: GameState;
+
+  private renderedUnits = new Map<string, Phaser.GameObjects.Sprite>();
 
   public preload() {
     console.log("preload main scene");
@@ -20,46 +27,57 @@ export class MainScene extends Phaser.Scene {
   public create() {
     console.log("create main scene");
 
-    this.text = this.add.text(10, 10, "pixel");
-    this.posText = this.add.text(10, 25, "coord2");
+    this.text = this.add.text(700, 10, "pixel");
+    this.posText = this.add.text(700, 25, "offset coord");
 
     //tile x dimensions are: 7px space, 18px edge, 7px space
     //scaled up it is: 14px, 36px, 14px
     //the offset is 7px * 18px = 25 then *2 for scale so 50px
     //the edge is 18px then *2 for scale so 32px
-    let startX = 50;
-    let startY = 50;
+    let xOffset = 25;
+    let yOffset = 25;
     let tileWidth = 64;
     let tileHeight = 64;
     let xEdge = 36;
 
-    this.hexMap = new HexMap(startX, startY, tileWidth, tileHeight, xEdge);
+    this.hexMap = new HexMap(xOffset, yOffset, tileWidth, tileHeight, xEdge);
 
     for (let y = 0; y < 8; y++) {
       for (let x = 0; x < 12; x++) {
-        const pixel = this.hexMap.coordinateToPixel(x, y);
+        const pixel = this.hexMap.offsetCoordinateToPixel({ x, y });
         this.add.sprite(pixel.x, pixel.y, "hex").setScale(2).setOrigin(0, 0);
 
         this.addDebugText(pixel, { x, y });
       }
     }
 
-    console.log("adding sprites");
-    //Add some character sprites
-    let spriteBasePixel = this.hexMap.coordinateToPixel(2, 2);
-    this.add
-      .sprite(spriteBasePixel.x, spriteBasePixel.y, "knight")
-      .setScale(2)
-      .setOrigin(0, 0);
+    // Game setup stuff
+    this.gameState = new GameState();
 
-    spriteBasePixel = this.hexMap.coordinateToPixel(5, 5);
-    this.add
-      .sprite(spriteBasePixel.x, spriteBasePixel.y, "warrior")
-      .setScale(2)
-      .setOrigin(0, 0);
+    const unit1 = new Unit("1", new UnitSpec("knight"));
+    unit1.position = { x: 1, y: -2, z: 1 };
+
+    const unit2 = new Unit("2", new UnitSpec("warrior"));
+    unit2.position = { x: 3, y: -4, z: 1 };
+
+    this.gameState.units = [unit1, unit2];
+
+    this.renderGameState(this.gameState);
+
+    //Touch stuff
+    this.input.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+      var touchX = pointer.worldX;
+      var touchY = pointer.worldY;
+
+      const offsetCoord = this.hexMap.pixelToOffsetCoordinate(touchX, touchY);
+
+      console.log(
+        `pointer up: ${touchX}, ${touchY} ------ ${offsetCoord.x}, ${offsetCoord.y}`
+      );
+    });
   }
 
-  private addDebugText(pixel: Pixel, offsetCoord: Coordinate) {
+  private addDebugText(pixel: Pixel, offsetCoord: OffsetCoord) {
     const { x, y, z } = hexUtil.offsetCoordToCubeCoord(offsetCoord);
     this.add
       .text(pixel.x + 32, pixel.y + 32, `(${x},${y},${z})`, {
@@ -73,10 +91,26 @@ export class MainScene extends Phaser.Scene {
     const pX = this.game.input.mousePointer.worldX;
     const pY = this.game.input.mousePointer.worldY;
 
-    this.text.text = `pixel x: ${pX} y: ${pY}`;
+    this.text.text = `pixel    x: ${pX} y: ${pY}`;
 
-    const coord = this.hexMap.pixelToCoordinate(pX, pY);
-
-    this.posText.text = `coord2 x: ${coord.x} y: ${coord.y}`;
+    const coord = this.hexMap.pixelToOffsetCoordinate(pX, pY);
+    this.posText.text = `offset   x: ${coord.x} y: ${coord.y}`;
   }
+
+  private renderGameState(gameState: GameState) {
+    console.log("rendering game state");
+    gameState.units.forEach(this.renderUnit);
+  }
+
+  private renderUnit = (unit: Unit) => {
+    const offsetCoord = hexUtil.cubeCoordToOffsetCoord(unit.position);
+    const pixel = this.hexMap.offsetCoordinateToPixel(offsetCoord);
+
+    const renderedUnit = this.add
+      .sprite(pixel.x, pixel.y, unit.spec.spriteName)
+      .setScale(2)
+      .setOrigin(0, 0);
+
+    this.renderedUnits.set(unit.id, renderedUnit);
+  };
 }

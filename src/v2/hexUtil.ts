@@ -2,7 +2,7 @@
 // https://www.redblobgames.com/grids/hexagons/
 // https://www.redblobgames.com/grids/hexagons/implementation.html
 
-import { Point } from "./hexMap";
+import { OffsetCoord, Point } from "./hexMap";
 
 class HexUtil {
   public offsetCoordToCubeCoord(offsetCoord: Point): CubeCoord {
@@ -12,10 +12,16 @@ class HexUtil {
 
     return { x, y, z };
   }
+
+  public cubeCoordToOffsetCoord(cubeCoord: CubeCoord): OffsetCoord {
+    const x = cubeCoord.x;
+    const y = cubeCoord.z + (cubeCoord.x - (cubeCoord.x & 1)) / 2;
+    return { x, y };
+  }
 }
 
 //TODO: get the interfaces in line
-interface CubeCoord {
+export interface CubeCoord {
   x: number;
   y: number;
   z: number;
