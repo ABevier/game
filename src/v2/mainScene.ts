@@ -2,6 +2,7 @@ import { Game } from "phaser";
 import { GameState, Unit, UnitSpec } from "./gameState";
 import HexMap, { OffsetCoord, Pixel } from "./hexMap";
 import hexUtil from "./hexUtil";
+import { isEqual, keyBy } from "lodash";
 
 // hex tiles: https://opengameart.org/content/hex-tileset-pack
 // used Piskel (piskelappcom)
@@ -66,14 +67,26 @@ export class MainScene extends Phaser.Scene {
 
     //Touch stuff
     this.input.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-      var touchX = pointer.worldX;
-      var touchY = pointer.worldY;
+      //TODO: refactor to new function
+      const pixel = { x: pointer.worldX, y: pointer.worldY };
 
-      const offsetCoord = this.hexMap.pixelToOffsetCoordinate(touchX, touchY);
+      const offsetCoord = this.hexMap.pixelToOffsetCoordinate(pixel);
+      const cubeCoord = hexUtil.offsetCoordToCubeCoord(offsetCoord);
 
       console.log(
-        `pointer up: ${touchX}, ${touchY} ------ ${offsetCoord.x}, ${offsetCoord.y}`
+        `pointer up: pixel:${pixel.x}, ${pixel.y} offset:${offsetCoord.x}, ${offsetCoord.y} cube:${cubeCoord.x}, ${cubeCoord.y}, ${cubeCoord.z}}`
       );
+
+      //consider not using lodash for this and just making CubeCoord a class?
+      const found = this.gameState.units.find((unit) =>
+        isEqual(unit.position, cubeCoord)
+      );
+
+      if (found) {
+        console.log(
+          `clicked on unit with id:${found.id} and sprite:${found.spec.spriteName}`
+        );
+      }
     });
   }
 
@@ -88,12 +101,14 @@ export class MainScene extends Phaser.Scene {
   }
 
   public update() {
-    const pX = this.game.input.mousePointer.worldX;
-    const pY = this.game.input.mousePointer.worldY;
+    const pixel = {
+      x: this.game.input.mousePointer.worldX,
+      y: this.game.input.mousePointer.worldY,
+    };
 
-    this.text.text = `pixel    x: ${pX} y: ${pY}`;
+    this.text.text = `pixel    x: ${pixel.x} y: ${pixel.y}`;
 
-    const coord = this.hexMap.pixelToOffsetCoordinate(pX, pY);
+    const coord = this.hexMap.pixelToOffsetCoordinate(pixel);
     this.posText.text = `offset   x: ${coord.x} y: ${coord.y}`;
   }
 

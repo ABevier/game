@@ -49,7 +49,7 @@ class HexMap {
 
   //TODO: Unit test me please!!!
   // Given a pixel on the screen convert to a map coordinate
-  public pixelToOffsetCoordinate(pX: number, pY: number): OffsetCoord {
+  public pixelToOffsetCoordinate(pixel: Pixel): OffsetCoord {
     //this function uses a "virtual tile" to find the x and y.  This is a repeating pattern that overlaps parts
     //of 5 hexes.  The virtual tile gives a starting point for the actual coordinate and is then offset
     //depening on where the point (xMod, yMod) falls within the virtual tile
@@ -61,8 +61,8 @@ class HexMap {
 
     const tilingWidth = this.tileWidth + this.xEdgeLength;
 
-    const mapX = pX - this.xOrigin;
-    const mapY = pY - this.yOrigin;
+    const mapX = pixel.x - this.xOrigin;
+    const mapY = pixel.y - this.yOrigin;
 
     //coordX and coordY are the coordinates of the "virtual tile" which then need to be offset depending on
     //where in the virtual tile the point actually is
