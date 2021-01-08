@@ -49,8 +49,9 @@ export class GameEngine {
   }
 
   //TODO: this is just a junky stub
-  public takeAction(unit: Unit) {
+  public takeAction(unit: Unit, coord: CubeCoord) {
     console.log("take action:", unit);
+    unit.position = coord;
     unit.cooldown = 1;
     this.updateState();
   }

@@ -1,7 +1,7 @@
 import { Game } from "phaser";
 import { GameEngine, GameState, Player, Unit, UnitSpec } from "./gameState";
 import HexMap, { OffsetCoord, Pixel } from "./hexMap";
-import hexUtil from "./hexUtil";
+import hexUtil, { CubeCoord } from "./hexUtil";
 import { isEqual, keyBy } from "lodash";
 import { game } from "../main";
 
@@ -79,29 +79,6 @@ export class MainScene extends Phaser.Scene {
     );
 
     this.renderGameState(this.gameEngine.gameState);
-
-    //
-    // Input Handling
-    //
-    this.input.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-      //TODO: refactor to new function
-      const pixel = { x: pointer.worldX, y: pointer.worldY };
-
-      const offsetCoord = this.hexMap.pixelToOffsetCoordinate(pixel);
-      const cubeCoord = hexUtil.offsetCoordToCubeCoord(offsetCoord);
-
-      console.log(
-        `pointer up: pixel:${pixel.x}, ${pixel.y} offset:${offsetCoord.x}, ${offsetCoord.y} cube:${cubeCoord.x}, ${cubeCoord.y}, ${cubeCoord.z}}`
-      );
-
-      const found = this.gameEngine.findUnitAtCoordinate(cubeCoord);
-      if (found) {
-        console.log(`clicked on unit with id:${found.id}`);
-        if (this.gameEngine.canActivateUnit(found)) {
-          this.gameEngine.takeAction(found);
-        }
-      }
-    });
   }
 
   public update() {
@@ -131,6 +108,8 @@ export class MainScene extends Phaser.Scene {
     console.log(gameState);
     this.activePlayerText.setText(`ActivePlayer: ${gameState.activePlayerId}`);
     gameState.units.forEach((unit) => this.renderUnit(unit));
+
+    this.collectInput();
   }
 
   private renderUnit(unit: Unit) {
@@ -143,5 +122,53 @@ export class MainScene extends Phaser.Scene {
       .setOrigin(0, 0);
 
     this.renderedUnits.set(unit.id, renderedUnit);
+  }
+
+  private async collectInput() {
+    console.log("INPUT STATE: wait for unit click");
+    let unit: Unit = null;
+    let isValid = false;
+    do {
+      unit = await this.waitForClickedUnit();
+      isValid = this.gameEngine.canActivateUnit(unit);
+    } while (!isValid);
+
+    console.log(`INPUT STATE: selected unit ${unit.id} waiting for tile`);
+
+    let coord = await this.waitForClickedHex();
+
+    console.log("INPUT STATE: complete");
+
+    this.gameEngine.takeAction(unit, coord);
+  }
+
+  //TODO: this should validate
+  private async waitForClickedUnit(): Promise<Unit> {
+    let unit: Unit = null;
+
+    do {
+      const cubeCoord = await this.waitForClickedHex();
+      unit = this.gameEngine.findUnitAtCoordinate(cubeCoord);
+    } while (!unit);
+
+    console.log(`clicked on unit with id:${unit.id}`);
+    return unit;
+  }
+
+  private waitForClickedHex(): Promise<CubeCoord> {
+    return new Promise((resolve, reject) => {
+      this.input.once("pointerup", (pointer: Phaser.Input.Pointer) => {
+        const pixel = { x: pointer.worldX, y: pointer.worldY };
+        const offsetCoord = this.hexMap.pixelToOffsetCoordinate(pixel);
+        const cubeCoord = hexUtil.offsetCoordToCubeCoord(offsetCoord);
+
+        console.log(
+          `pointer up: pixel:${pixel.x}, ${pixel.y} offset:${offsetCoord.x}, ${offsetCoord.y} cube:${cubeCoord.x}, ${cubeCoord.y}, ${cubeCoord.z}}`
+        );
+
+        //TODO: what to do for out of bounds!! --- this should validate
+        resolve(cubeCoord);
+      });
+    });
   }
 }
