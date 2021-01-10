@@ -113,15 +113,28 @@ export class MainScene extends Phaser.Scene {
   }
 
   private renderUnit(unit: Unit) {
+    const sprite = this.findOrCreateUnitSprite(unit);
+
     const offsetCoord = hexUtil.cubeCoordToOffsetCoord(unit.position);
     const pixel = this.hexMap.offsetCoordinateToPixel(offsetCoord);
 
-    const renderedUnit = this.add
-      .sprite(pixel.x, pixel.y, unit.spec.spriteName)
-      .setScale(2)
-      .setOrigin(0, 0);
+    sprite.setX(pixel.x);
+    sprite.setY(pixel.y);
+  }
 
-    this.renderedUnits.set(unit.id, renderedUnit);
+  private findOrCreateUnitSprite(unit: Unit): Phaser.GameObjects.Sprite {
+    let renderedUnit = this.renderedUnits.get(unit.id);
+
+    if (!renderedUnit) {
+      console.log(`create new unit with id: ${unit.id}`);
+      renderedUnit = this.add
+        .sprite(0, 0, unit.spec.spriteName)
+        .setScale(2)
+        .setOrigin(0, 0);
+      this.renderedUnits.set(unit.id, renderedUnit);
+    }
+
+    return renderedUnit;
   }
 
   private async collectInput() {
