@@ -1,7 +1,7 @@
 import { Game } from "phaser";
 import { GameEngine, GameState, Player, Unit, UnitSpec } from "./gameState";
 import HexMap, { OffsetCoord, Pixel } from "./hexMap";
-import { CubeCoord } from "./hexUtil";
+import HexUtil, { CubeCoord } from "./hexUtil";
 
 // hex tiles: https://opengameart.org/content/hex-tileset-pack
 // used Piskel (piskelappcom)
@@ -88,6 +88,7 @@ export class MainScene extends Phaser.Scene {
       renderedUnit = this.add
         .sprite(0, 0, unit.spec.spriteName)
         .setScale(2)
+        .setDepth(2)
         .setOrigin(0, 0);
       this.renderedUnits.set(unit.id, renderedUnit);
     }
@@ -105,8 +106,11 @@ export class MainScene extends Phaser.Scene {
     } while (!isValid);
 
     console.log(`INPUT STATE: selected unit ${unit.id} waiting for tile`);
+    const neighbors = HexUtil.getNeighbors(unit.position);
+    this.hexMap.highlightTiles(this, neighbors);
 
     let coord = await this.waitForClickedHex();
+    this.hexMap.clearHighlights();
 
     console.log("INPUT STATE: complete");
 

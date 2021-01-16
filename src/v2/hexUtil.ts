@@ -4,6 +4,7 @@
 
 import { OffsetCoord, Point } from "./hexMap";
 
+//This class focuses on Cube Coordinates Hexes Only.  No pixel math.
 class HexUtil {
   public offsetCoordToCubeCoord(offsetCoord: Point): CubeCoord {
     const x = offsetCoord.x;
@@ -17,6 +18,19 @@ class HexUtil {
     const x = cubeCoord.x;
     const y = cubeCoord.z + (cubeCoord.x - (cubeCoord.x & 1)) / 2;
     return { x, y };
+  }
+
+  public getNeighbors(cubeCoord: CubeCoord): CubeCoord[] {
+    const { x, y, z } = cubeCoord;
+    //TODO: how to make sure it's in bounds?  hex map probably?
+    return [
+      { x: x + 1, y: y - 1, z },
+      { x: x + 1, y, z: z - 1 },
+      { x, y: y + 1, z: z - 1 },
+      { x, y: y - 1, z: z + 1 },
+      { x: x - 1, y: y + 1, z },
+      { x: x - 1, y, z: z + 1 },
+    ];
   }
 }
 

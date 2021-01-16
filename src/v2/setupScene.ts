@@ -4,6 +4,7 @@ export class SetupScene extends Phaser.Scene {
   public preload() {
     console.log("preload setup scene");
     this.load.image("hex", "assets/hex.png");
+    this.load.image("hex_highlight", "assets/hex_highlight.png");
 
     this.load.image("knight", "assets/Knight.png");
     this.load.image("warrior", "assets/Warrior.png");

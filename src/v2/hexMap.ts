@@ -1,5 +1,6 @@
+import HexHighlightSprite from "./hexHighlightSprite";
 import HexSprite from "./hexSprite";
-import HexUtil, { CubeCoord } from "./HexUtil";
+import HexUtil, { CubeCoord } from "./hexUtil";
 
 //TODO: we need some unit tests on this guy, holy carp
 // This is an "odd-q" hexmap that uses "square hexes"
@@ -14,6 +15,8 @@ class HexMap {
   private readonly right: Point;
   private readonly lowerLeft: Point;
   private readonly lowerRight: Point;
+
+  private readonly highlights: HexHighlightSprite[] = [];
 
   constructor(
     private xOrigin: number,
@@ -46,6 +49,21 @@ class HexMap {
         scene.add.existing(hex);
       }
     }
+  }
+
+  public highlightTiles(scene: Phaser.Scene, coords: CubeCoord[]) {
+    coords.forEach((coord) => this.highlightTile(scene, coord));
+  }
+
+  public highlightTile(scene: Phaser.Scene, cubeCoord: CubeCoord) {
+    const pixel = this.cubeCoordToPixel(cubeCoord);
+    const highlight = new HexHighlightSprite(scene, pixel);
+    scene.add.existing(highlight);
+    this.highlights.push(highlight);
+  }
+
+  public clearHighlights() {
+    this.highlights.forEach((highlight) => highlight.destroy());
   }
 
   // Take an X,Y,Z coord or a hex and convert it to a pixel

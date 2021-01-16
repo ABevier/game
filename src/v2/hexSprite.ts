@@ -16,6 +16,7 @@ export default class HexSprite extends Phaser.GameObjects.Sprite {
         fontFamily: "Verdana, sans-serif",
         fontSize: 10,
       })
+      .setDepth(1)
       .setOrigin(0.5, 0.5);
   }
 }
