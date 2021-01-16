@@ -1,9 +1,7 @@
 import { Game } from "phaser";
 import { GameEngine, GameState, Player, Unit, UnitSpec } from "./gameState";
 import HexMap, { OffsetCoord, Pixel } from "./hexMap";
-import hexUtil, { CubeCoord } from "./hexUtil";
-import { isEqual, keyBy } from "lodash";
-import { game } from "../main";
+import { CubeCoord } from "./hexUtil";
 
 // hex tiles: https://opengameart.org/content/hex-tileset-pack
 // used Piskel (piskelappcom)
@@ -19,12 +17,16 @@ export class MainScene extends Phaser.Scene {
   private activePlayerText: Phaser.GameObjects.Text;
   private renderedUnits = new Map<string, Phaser.GameObjects.Sprite>();
 
-  public preload() {
-    console.log("preload main scene");
-    this.load.image("hex", "assets/hex.png");
+  constructor() {
+    super("main");
+  }
 
-    this.load.image("knight", "assets/Knight.png");
-    this.load.image("warrior", "assets/Warrior.png");
+  public init(gameState: GameState) {
+    console.log("Init with gamestate:", gameState);
+
+    this.gameEngine = new GameEngine(gameState, (gameState) =>
+      this.renderGameState(gameState)
+    );
   }
 
   public create() {
@@ -45,38 +47,7 @@ export class MainScene extends Phaser.Scene {
     let xEdge = 36;
 
     this.hexMap = new HexMap(xOffset, yOffset, tileWidth, tileHeight, xEdge);
-
-    for (let y = 0; y < 8; y++) {
-      for (let x = 0; x < 12; x++) {
-        const pixel = this.hexMap.offsetCoordinateToPixel({ x, y });
-        this.add.sprite(pixel.x, pixel.y, "hex").setScale(2).setOrigin(0, 0);
-
-        this.addDebugText(pixel, { x, y });
-      }
-    }
-
-    //
-    // Game setup stuff
-    //
-    const gameState = new GameState();
-
-    //player 1
-    const player1 = new Player("player-1");
-    const unit1 = new Unit("unit-1", player1.id, new UnitSpec("knight"));
-    unit1.position = { x: 1, y: -2, z: 1 };
-
-    //player 2
-    const player2 = new Player("player-2");
-    const unit2 = new Unit("unit-2", player2.id, new UnitSpec("warrior"));
-    unit2.position = { x: 3, y: -4, z: 1 };
-
-    gameState.players = [player1, player2];
-    gameState.units = [unit1, unit2];
-    gameState.activePlayerId = player1.id;
-
-    this.gameEngine = new GameEngine(gameState, (gameState) =>
-      this.renderGameState(gameState)
-    );
+    this.hexMap.render(this);
 
     this.renderGameState(this.gameEngine.gameState);
   }
@@ -93,16 +64,6 @@ export class MainScene extends Phaser.Scene {
     this.posText.text = `offset   x: ${coord.x} y: ${coord.y}`;
   }
 
-  private addDebugText(pixel: Pixel, offsetCoord: OffsetCoord) {
-    const { x, y, z } = hexUtil.offsetCoordToCubeCoord(offsetCoord);
-    this.add
-      .text(pixel.x + 32, pixel.y + 32, `(${x},${y},${z})`, {
-        fontFamily: "Verdana, sans-serif",
-        fontSize: 10,
-      })
-      .setOrigin(0.5, 0.5);
-  }
-
   private renderGameState(gameState: GameState) {
     console.log("rendering game state");
     console.log(gameState);
@@ -114,10 +75,7 @@ export class MainScene extends Phaser.Scene {
 
   private renderUnit(unit: Unit) {
     const sprite = this.findOrCreateUnitSprite(unit);
-
-    const offsetCoord = hexUtil.cubeCoordToOffsetCoord(unit.position);
-    const pixel = this.hexMap.offsetCoordinateToPixel(offsetCoord);
-
+    const pixel = this.hexMap.cubeCoordToPixel(unit.position);
     sprite.setX(pixel.x);
     sprite.setY(pixel.y);
   }
@@ -172,11 +130,10 @@ export class MainScene extends Phaser.Scene {
     return new Promise((resolve, reject) => {
       this.input.once("pointerup", (pointer: Phaser.Input.Pointer) => {
         const pixel = { x: pointer.worldX, y: pointer.worldY };
-        const offsetCoord = this.hexMap.pixelToOffsetCoordinate(pixel);
-        const cubeCoord = hexUtil.offsetCoordToCubeCoord(offsetCoord);
+        const cubeCoord = this.hexMap.pixelToCubeCoord(pixel);
 
         console.log(
-          `pointer up: pixel:${pixel.x}, ${pixel.y} offset:${offsetCoord.x}, ${offsetCoord.y} cube:${cubeCoord.x}, ${cubeCoord.y}, ${cubeCoord.z}}`
+          `pointer up: pixel:${pixel.x}, ${pixel.y} cube:${cubeCoord.x}, ${cubeCoord.y}, ${cubeCoord.z}}`
         );
 
         //TODO: what to do for out of bounds!! --- this should validate

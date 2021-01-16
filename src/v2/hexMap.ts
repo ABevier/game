@@ -1,3 +1,6 @@
+import HexSprite from "./hexSprite";
+import HexUtil, { CubeCoord } from "./HexUtil";
+
 //TODO: we need some unit tests on this guy, holy carp
 // This is an "odd-q" hexmap that uses "square hexes"
 // Square hexes have a width that that is divided in 4 parts: 1/4 space, 1/2 edge, 1/4 space
@@ -32,6 +35,29 @@ class HexMap {
     this.lowerRight = { x: this.xEdgeEnd, y: tileHeight };
 
     console.log(this);
+  }
+
+  public render(scene: Phaser.Scene) {
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 12; x++) {
+        const pixel = this.offsetCoordinateToPixel({ x, y });
+        const cubeCoordinate = this.pixelToCubeCoord(pixel);
+        const hex = new HexSprite(scene, pixel, cubeCoordinate);
+        scene.add.existing(hex);
+      }
+    }
+  }
+
+  // Take an X,Y,Z coord or a hex and convert it to a pixel
+  public cubeCoordToPixel(cubeCoord: CubeCoord): Pixel {
+    const offsetCoord = HexUtil.cubeCoordToOffsetCoord(cubeCoord);
+    return this.offsetCoordinateToPixel(offsetCoord);
+  }
+
+  // Take a pixel and convert it to a cube coordinate
+  public pixelToCubeCoord(pixel: Pixel): CubeCoord {
+    const offsetCoord = this.pixelToOffsetCoordinate(pixel);
+    return HexUtil.offsetCoordToCubeCoord(offsetCoord);
   }
 
   // Take an X,Y coord of a hex to a pixel on the map
