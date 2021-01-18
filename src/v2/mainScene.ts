@@ -1,7 +1,8 @@
 import { Game } from "phaser";
+import { CubeCoord } from "./coords";
 import { GameEngine, GameState, Player, Unit, UnitSpec } from "./gameState";
-import HexMap, { OffsetCoord, Pixel } from "./hexMap";
-import HexUtil, { CubeCoord } from "./hexUtil";
+import HexMap from "./hexMap";
+import HexUtil from "./hexUtil";
 
 // hex tiles: https://opengameart.org/content/hex-tileset-pack
 // used Piskel (piskelappcom)

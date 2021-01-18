@@ -1,5 +1,6 @@
 import { isEqual } from "lodash";
-import hexUtil, { CubeCoord } from "./hexUtil";
+import { CubeCoord } from "./coords";
+import HexUtil from "./hexUtil";
 
 export class GameMap {
   constructor(public readonly width: number, public readonly height: number) {}
@@ -54,13 +55,17 @@ export class GameEngine {
 
   public findMovesForUnit(unit: Unit): CubeCoord[] {
     //todo: real movement with a flood fill
-    const hexes = hexUtil.getNeighbors(unit.position);
+    return this.findNeighborsForCoord(unit.position);
+  }
+
+  public findNeighborsForCoord(coord: CubeCoord): CubeCoord[] {
+    const hexes = HexUtil.getNeighbors(coord);
     return hexes.filter((coord) => this.isCoordinateInBounds(coord));
   }
 
   public isCoordinateInBounds(coord: CubeCoord): boolean {
     // easiest way to figure this out is using offset coordinates
-    const offsetCoord = hexUtil.cubeCoordToOffsetCoord(coord);
+    const offsetCoord = HexUtil.cubeCoordToOffsetCoord(coord);
 
     return (
       offsetCoord.x >= 0 &&

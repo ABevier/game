@@ -1,4 +1,4 @@
-import { Pixel } from "./hexMap";
+import { Pixel } from "./coords";
 
 export default class HexHighlightSprite extends Phaser.GameObjects.Sprite {
   constructor(scene: Phaser.Scene, pixel: Pixel) {

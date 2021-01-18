@@ -1,13 +1,13 @@
+import { CubeCoord, OffsetCoord, Pixel, Point } from "./coords";
 import { GameMap } from "./gameState";
 import HexHighlightSprite from "./hexHighlightSprite";
 import HexSprite from "./hexSprite";
-import hexUtil from "./hexUtil";
-import HexUtil, { CubeCoord } from "./hexUtil";
+import HexUtil from "./hexUtil";
 
 //TODO: we need some unit tests on this guy, holy carp
 // This is an "odd-q" hexmap that uses "square hexes"
 // Square hexes have a width that that is divided in 4 parts: 1/4 space, 1/2 edge, 1/4 space
-class HexMap {
+export default class HexMap {
   private readonly xEdgeStart: number;
   private readonly xEdgeEnd: number;
 
@@ -46,7 +46,7 @@ class HexMap {
     for (let y = 0; y < map.height; y++) {
       for (let x = 0; x < map.width; x++) {
         const pixel = this.offsetCoordinateToPixel({ x, y });
-        const cubeCoordinate = hexUtil.offsetCoordToCubeCoord({ x, y });
+        const cubeCoordinate = HexUtil.offsetCoordToCubeCoord({ x, y });
         const hex = new HexSprite(scene, pixel, cubeCoordinate);
         scene.add.existing(hex);
       }
@@ -156,20 +156,3 @@ class HexMap {
     return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x) > 0;
   }
 }
-
-export interface Point {
-  x: number;
-  y: number;
-}
-
-export interface OffsetCoord {
-  x: number;
-  y: number;
-}
-
-export interface Pixel {
-  x: number;
-  y: number;
-}
-
-export default HexMap;

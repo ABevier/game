@@ -1,5 +1,4 @@
-import { Pixel } from "./hexMap";
-import { CubeCoord } from "./hexUtil";
+import { Pixel, CubeCoord } from "./coords";
 
 export default class HexSprite extends Phaser.GameObjects.Sprite {
   constructor(scene: Phaser.Scene, pixel: Pixel, cubeCoordinate: CubeCoord) {
