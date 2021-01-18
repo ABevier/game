@@ -47,7 +47,7 @@ export class MainScene extends Phaser.Scene {
     let xEdge = 36;
 
     this.hexMap = new HexMap(xOffset, yOffset, tileWidth, tileHeight, xEdge);
-    this.hexMap.render(this);
+    this.hexMap.render(this, this.gameEngine.gameState.map);
 
     this.renderGameState(this.gameEngine.gameState);
   }
@@ -106,7 +106,7 @@ export class MainScene extends Phaser.Scene {
     } while (!isValid);
 
     console.log(`INPUT STATE: selected unit ${unit.id} waiting for tile`);
-    const neighbors = HexUtil.getNeighbors(unit.position);
+    const neighbors = this.gameEngine.findMovesForUnit(unit);
     this.hexMap.highlightTiles(this, neighbors);
 
     let coord = await this.waitForClickedHex();

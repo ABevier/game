@@ -1,5 +1,7 @@
+import { GameMap } from "./gameState";
 import HexHighlightSprite from "./hexHighlightSprite";
 import HexSprite from "./hexSprite";
+import hexUtil from "./hexUtil";
 import HexUtil, { CubeCoord } from "./hexUtil";
 
 //TODO: we need some unit tests on this guy, holy carp
@@ -40,11 +42,11 @@ class HexMap {
     console.log(this);
   }
 
-  public render(scene: Phaser.Scene) {
-    for (let y = 0; y < 8; y++) {
-      for (let x = 0; x < 12; x++) {
+  public render(scene: Phaser.Scene, map: GameMap) {
+    for (let y = 0; y < map.height; y++) {
+      for (let x = 0; x < map.width; x++) {
         const pixel = this.offsetCoordinateToPixel({ x, y });
-        const cubeCoordinate = this.pixelToCubeCoord(pixel);
+        const cubeCoordinate = hexUtil.offsetCoordToCubeCoord({ x, y });
         const hex = new HexSprite(scene, pixel, cubeCoordinate);
         scene.add.existing(hex);
       }

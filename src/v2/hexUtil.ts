@@ -20,9 +20,9 @@ class HexUtil {
     return { x, y };
   }
 
+  //Note: this doesn't check for legal hexes. They could be out of bounds.
   public getNeighbors(cubeCoord: CubeCoord): CubeCoord[] {
     const { x, y, z } = cubeCoord;
-    //TODO: how to make sure it's in bounds?  hex map probably?
     return [
       { x: x + 1, y: y - 1, z },
       { x: x + 1, y, z: z - 1 },

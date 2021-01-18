@@ -1,4 +1,4 @@
-import { GameState, Player, Unit, UnitSpec } from "./gameState";
+import { GameMap, GameState, Player, Unit, UnitSpec } from "./gameState";
 
 export class SetupScene extends Phaser.Scene {
   public preload() {
@@ -15,6 +15,10 @@ export class SetupScene extends Phaser.Scene {
     // Game setup stuff
     //
     const gameState = new GameState();
+
+    //map
+    const map = new GameMap(12, 8);
+    gameState.map = map;
 
     //player 1
     const player1 = new Player("player-1");

@@ -1,6 +1,9 @@
 import { isEqual } from "lodash";
-import { Game } from "phaser";
-import { CubeCoord } from "./hexUtil";
+import hexUtil, { CubeCoord } from "./hexUtil";
+
+export class GameMap {
+  constructor(public readonly width: number, public readonly height: number) {}
+}
 
 export class Player {
   constructor(public readonly id: string) {}
@@ -29,6 +32,7 @@ export class GameState {
 
   public activeUnitId: string;
   public units: Unit[] = [];
+  public map: GameMap;
 }
 
 export class GameEngine {
@@ -46,6 +50,24 @@ export class GameEngine {
   public findUnitAtCoordinate(coord: CubeCoord): Unit | null {
     //consider not using lodash for this and just making CubeCoord a class?
     return this.gameState.units.find((unit) => isEqual(unit.position, coord));
+  }
+
+  public findMovesForUnit(unit: Unit): CubeCoord[] {
+    //todo: real movement with a flood fill
+    const hexes = hexUtil.getNeighbors(unit.position);
+    return hexes.filter((coord) => this.isCoordinateInBounds(coord));
+  }
+
+  public isCoordinateInBounds(coord: CubeCoord): boolean {
+    // easiest way to figure this out is using offset coordinates
+    const offsetCoord = hexUtil.cubeCoordToOffsetCoord(coord);
+
+    return (
+      offsetCoord.x >= 0 &&
+      offsetCoord.x < this.gameState.map.width &&
+      offsetCoord.y >= 0 &&
+      offsetCoord.y <= this.gameState.map.height
+    );
   }
 
   //TODO: this is just a junky stub
