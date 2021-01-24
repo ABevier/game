@@ -1,8 +1,10 @@
+import { Core } from "phaser";
 import { CubeCoord, OffsetCoord, Pixel, Point } from "./coords";
 import { GameMap } from "./gameState";
 import HexHighlightSprite from "./hexHighlightSprite";
 import HexSprite from "./hexSprite";
 import HexUtil from "./hexUtil";
+import { isEqual } from "lodash";
 
 //TODO: we need some unit tests on this guy, holy carp
 // This is an "odd-q" hexmap that uses "square hexes"
@@ -59,13 +61,19 @@ export default class HexMap {
 
   public highlightTile(scene: Phaser.Scene, cubeCoord: CubeCoord) {
     const pixel = this.cubeCoordToPixel(cubeCoord);
-    const highlight = new HexHighlightSprite(scene, pixel);
+    const highlight = new HexHighlightSprite(scene, pixel, cubeCoord);
     scene.add.existing(highlight);
     this.highlights.push(highlight);
   }
 
   public clearHighlights() {
     this.highlights.forEach((highlight) => highlight.destroy());
+    this.highlights.length = 0;
+  }
+
+  public isTileHighlighted(coord: CubeCoord): boolean {
+    console.log(this.highlights);
+    return this.highlights.some((hex) => isEqual(hex.cubeCoord, coord));
   }
 
   // Take an X,Y,Z coord or a hex and convert it to a pixel

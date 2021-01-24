@@ -110,7 +110,7 @@ export class MainScene extends Phaser.Scene {
     const neighbors = this.gameEngine.findMovesForUnit(unit);
     this.hexMap.highlightTiles(this, neighbors);
 
-    let coord = await this.waitForClickedHex();
+    let coord = await this.waitForClickedHighlightedTile();
     this.hexMap.clearHighlights();
 
     console.log("INPUT STATE: complete");
@@ -118,12 +118,11 @@ export class MainScene extends Phaser.Scene {
     this.gameEngine.takeAction(unit, coord);
   }
 
-  //TODO: this should validate
   private async waitForClickedUnit(): Promise<Unit> {
     let unit: Unit = null;
 
     do {
-      const cubeCoord = await this.waitForClickedHex();
+      const cubeCoord = await this.waitForClickedTile();
       unit = this.gameEngine.findUnitAtCoordinate(cubeCoord);
     } while (!unit);
 
@@ -131,7 +130,35 @@ export class MainScene extends Phaser.Scene {
     return unit;
   }
 
-  private waitForClickedHex(): Promise<CubeCoord> {
+  private async waitForClickedHighlightedTile(): Promise<CubeCoord> {
+    //TODO: What happens if there are no highlighted tiles...?
+    let tile: CubeCoord = null;
+    do {
+      const rawTile = await this.waitForClickedTile();
+      if (this.hexMap.isTileHighlighted(rawTile)) {
+        tile = rawTile;
+      }
+    } while (!tile);
+
+    return tile;
+  }
+
+  // gets a click on a valid tile
+  private async waitForClickedTile(): Promise<CubeCoord> {
+    let coord: CubeCoord = null;
+
+    do {
+      const rawCoord = await this.waitForClick();
+      if (this.gameEngine.isCoordinateInBounds(rawCoord)) {
+        coord = rawCoord;
+      }
+    } while (!coord);
+
+    return coord;
+  }
+
+  // wait for a raw click
+  private waitForClick(): Promise<CubeCoord> {
     return new Promise((resolve, reject) => {
       this.input.once("pointerup", (pointer: Phaser.Input.Pointer) => {
         const pixel = { x: pointer.worldX, y: pointer.worldY };
@@ -141,7 +168,6 @@ export class MainScene extends Phaser.Scene {
           `pointer up: pixel:${pixel.x}, ${pixel.y} cube:${cubeCoord.x}, ${cubeCoord.y}, ${cubeCoord.z}}`
         );
 
-        //TODO: what to do for out of bounds!! --- this should validate
         resolve(cubeCoord);
       });
     });

@@ -55,7 +55,9 @@ export class GameEngine {
 
   public findMovesForUnit(unit: Unit): CubeCoord[] {
     //todo: real movement with a flood fill
-    return this.findNeighborsForCoord(unit.position);
+    return this.findNeighborsForCoord(unit.position).filter(
+      (coord) => !this.findUnitAtCoordinate(coord)
+    );
   }
 
   public findNeighborsForCoord(coord: CubeCoord): CubeCoord[] {
