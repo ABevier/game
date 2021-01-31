@@ -1,11 +1,13 @@
-import { Game } from "phaser";
 import { CubeCoord } from "./coords";
 import { GameEngine, GameState, Player, Unit, UnitSpec } from "./gameState";
 import HexMap from "./hexMap";
-import HexUtil from "./hexUtil";
 
 // hex tiles: https://opengameart.org/content/hex-tileset-pack
 // used Piskel (piskelappcom)
+
+//TODO:
+// refactor the hexMap into a container
+// make a button class
 
 export class MainScene extends Phaser.Scene {
   private pixelText: Phaser.GameObjects.Text;
@@ -18,12 +20,19 @@ export class MainScene extends Phaser.Scene {
   private activePlayerText: Phaser.GameObjects.Text;
   private renderedUnits = new Map<string, Phaser.GameObjects.Sprite>();
 
+  //TODO: put all tiles in the container
+  private testContainer: Phaser.GameObjects.Container;
+
   constructor() {
     super("main");
   }
 
   public init(gameState: GameState) {
     console.log("Init with gamestate:", gameState);
+
+    this.testContainer = this.add.container(25, 25);
+    const hitArea = new Phaser.Geom.Rectangle(0, 0, 614, 544);
+    this.testContainer.setInteractive(hitArea, Phaser.Geom.Rectangle.Contains);
 
     this.gameEngine = new GameEngine(gameState, (gameState) =>
       this.renderGameState(gameState)
@@ -109,9 +118,18 @@ export class MainScene extends Phaser.Scene {
     console.log(`INPUT STATE: selected unit ${unit.id} waiting for tile`);
     const neighbors = this.gameEngine.findMovesForUnit(unit);
     this.hexMap.highlightTiles(this, neighbors);
+    const btn = this.add
+      .text(400, 400, "Cancel", {
+        fontFamily: "Verdana, sans-serif",
+        fontSize: 20,
+        fill: "#0f0",
+      })
+      .setInteractive()
+      .on("pointerdown", () => console.log("cancel button clicked"));
 
     let coord = await this.waitForClickedHighlightedTile();
     this.hexMap.clearHighlights();
+    btn.destroy();
 
     console.log("INPUT STATE: complete");
 
@@ -160,14 +178,13 @@ export class MainScene extends Phaser.Scene {
   // wait for a raw click
   private waitForClick(): Promise<CubeCoord> {
     return new Promise((resolve, reject) => {
-      this.input.once("pointerup", (pointer: Phaser.Input.Pointer) => {
+      this.testContainer.once("pointerup", (pointer: Phaser.Input.Pointer) => {
+        //this.input.once("pointerup", (pointer: Phaser.Input.Pointer) => {
         const pixel = { x: pointer.worldX, y: pointer.worldY };
         const cubeCoord = this.hexMap.pixelToCubeCoord(pixel);
-
         console.log(
-          `pointer up: pixel:${pixel.x}, ${pixel.y} cube:${cubeCoord.x}, ${cubeCoord.y}, ${cubeCoord.z}}`
+          `container pointer up: pixel:${pixel.x}, ${pixel.y} cube:${cubeCoord.x}, ${cubeCoord.y}, ${cubeCoord.z}}`
         );
-
         resolve(cubeCoord);
       });
     });
