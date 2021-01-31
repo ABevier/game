@@ -22,25 +22,25 @@ export class SetupScene extends Phaser.Scene {
 
     //player 1
     const player1 = new Player("player-1");
-    const unit1 = new Unit("unit-1", player1.id, new UnitSpec("knight"));
+    const unit1 = new Unit("unit-1", player1.id, new UnitSpec("knight", 2));
     unit1.position = { x: 1, y: -2, z: 1 };
 
-    const unit2 = new Unit("unit-2", player1.id, new UnitSpec("knight"));
+    const unit2 = new Unit("unit-2", player1.id, new UnitSpec("knight", 2));
     unit2.position = { x: 2, y: -2, z: 0 };
 
-    const unit3 = new Unit("unit-3", player1.id, new UnitSpec("knight"));
+    const unit3 = new Unit("unit-3", player1.id, new UnitSpec("knight", 2));
     unit3.position = { x: 3, y: -2, z: -1 };
 
     //player 2
     const player2 = new Player("player-2");
 
-    const unit4 = new Unit("unit-4", player2.id, new UnitSpec("warrior"));
+    const unit4 = new Unit("unit-4", player2.id, new UnitSpec("warrior", 2));
     unit4.position = { x: 3, y: -4, z: 1 };
 
-    const unit5 = new Unit("unit-5", player2.id, new UnitSpec("warrior"));
+    const unit5 = new Unit("unit-5", player2.id, new UnitSpec("warrior", 2));
     unit5.position = { x: 3, y: -5, z: 2 };
 
-    const unit6 = new Unit("unit-6", player2.id, new UnitSpec("warrior"));
+    const unit6 = new Unit("unit-6", player2.id, new UnitSpec("warrior", 2));
     unit6.position = { x: 4, y: -5, z: 1 };
 
     gameState.players = [player1, player2];

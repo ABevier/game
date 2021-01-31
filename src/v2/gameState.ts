@@ -12,7 +12,10 @@ export class Player {
 }
 
 export class UnitSpec {
-  constructor(public readonly spriteName: string) {}
+  constructor(
+    public readonly spriteName: string,
+    public readonly movement: number
+  ) {}
 }
 
 export class Unit {

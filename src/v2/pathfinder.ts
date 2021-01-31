@@ -25,7 +25,7 @@ class Pathfinder {
       const current = openList.pop();
       closedList.set(current.coord, current.coord);
 
-      if (current.moveCost <= 2) {
+      if (current.moveCost <= unit.spec.movement) {
         openList.push(
           ...this.findValidNextMoves(game, current.coord, current.moveCost)
         );
