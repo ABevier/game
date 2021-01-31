@@ -1,6 +1,7 @@
 import { isEqual } from "lodash";
 import { CubeCoord } from "./coords";
 import HexUtil from "./hexUtil";
+import Pathfinder from "./pathfinder";
 
 export class GameMap {
   constructor(public readonly width: number, public readonly height: number) {}
@@ -54,10 +55,7 @@ export class GameEngine {
   }
 
   public findMovesForUnit(unit: Unit): CubeCoord[] {
-    //todo: real movement with a flood fill
-    return this.findNeighborsForCoord(unit.position).filter(
-      (coord) => !this.findUnitAtCoordinate(coord)
-    );
+    return Pathfinder.findMovesForUnit(this, unit);
   }
 
   public findNeighborsForCoord(coord: CubeCoord): CubeCoord[] {
