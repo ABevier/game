@@ -1,6 +1,7 @@
 import { CubeCoord } from "./coords";
 import { GameEngine, GameState, Player, Unit, UnitSpec } from "./gameState";
 import HexMap from "./hexMap";
+import { waitForMenuSelection } from "./menu";
 
 // hex tiles: https://opengameart.org/content/hex-tileset-pack
 // used Piskel (piskelappcom)
@@ -115,21 +116,23 @@ export class MainScene extends Phaser.Scene {
       isValid = this.gameEngine.canActivateUnit(unit);
     } while (!isValid);
 
-    console.log(`INPUT STATE: selected unit ${unit.id} waiting for tile`);
+    console.log(`INPUT STATE: selected unit ${unit.id} waiting for menu click`);
+    const options = ["Move", "Attack"];
+    const result = await waitForMenuSelection(
+      this,
+      { x: 400, y: 400 },
+      options
+    );
+
+    console.log(
+      `INPUT STATE: selected ${options[result.i]} waiting for tile click`
+    );
+
     const neighbors = this.gameEngine.findMovesForUnit(unit);
     this.hexMap.highlightTiles(this, neighbors);
-    const btn = this.add
-      .text(400, 400, "Cancel", {
-        fontFamily: "Verdana, sans-serif",
-        fontSize: 20,
-        fill: "#0f0",
-      })
-      .setInteractive()
-      .on("pointerdown", () => console.log("cancel button clicked"));
 
     let coord = await this.waitForClickedHighlightedTile();
     this.hexMap.clearHighlights();
-    btn.destroy();
 
     console.log("INPUT STATE: complete");
 
