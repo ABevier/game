@@ -120,7 +120,7 @@ export class MainScene extends Phaser.Scene {
     const options = ["Move", "Attack"];
     const result = await waitForMenuSelection(
       this,
-      { x: 400, y: 400 },
+      { x: 700, y: 400 },
       options
     );
 

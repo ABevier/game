@@ -12,9 +12,9 @@ export const waitForMenuSelection = async (
 ) => {
   const items = options.map((text, i) => {
     const btn = scene.add
-      .text(pixel.x, pixel.y + i * 20, text, {
+      .text(pixel.x, pixel.y + i * 28, text, {
         fontFamily: "Verdana, sans-serif",
-        fontSize: 20,
+        fontSize: 25,
         fill: "#0f0",
       })
       .setInteractive();
