@@ -1,5 +1,12 @@
 import { CubeCoord } from "./coords";
-import { GameEngine, GameState, Player, Unit, UnitSpec } from "./gameState";
+import {
+  Action,
+  GameEngine,
+  GameState,
+  Player,
+  Unit,
+  UnitSpec,
+} from "./gameState";
 import HexMap from "./hexMap";
 import { waitForMenuSelection } from "./menu";
 
@@ -117,16 +124,15 @@ export class MainScene extends Phaser.Scene {
     } while (!isValid);
 
     console.log(`INPUT STATE: selected unit ${unit.id} waiting for menu click`);
-    const options = ["Move", "Attack"];
+    const options = ["move", "attack"];
     const result = await waitForMenuSelection(
       this,
       { x: 700, y: 400 },
       options
     );
 
-    console.log(
-      `INPUT STATE: selected ${options[result.i]} waiting for tile click`
-    );
+    const actionId = options[result.i];
+    console.log(`INPUT STATE: selected ${actionId} waiting for tile click`);
 
     const neighbors = this.gameEngine.findMovesForUnit(unit);
     this.hexMap.highlightTiles(this, neighbors);
@@ -136,7 +142,8 @@ export class MainScene extends Phaser.Scene {
 
     console.log("INPUT STATE: complete");
 
-    this.gameEngine.takeAction(unit, coord);
+    const action = new Action(unit.id, actionId, coord);
+    this.gameEngine.takeAction(action);
   }
 
   private async waitForClickedUnit(): Promise<Unit> {

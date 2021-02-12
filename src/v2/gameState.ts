@@ -1,5 +1,6 @@
 import { isEqual } from "lodash";
 import { CubeCoord } from "./coords";
+import { coordToString } from "./coordUtil";
 import HexUtil from "./hexUtil";
 import Pathfinder from "./pathfinder";
 
@@ -40,6 +41,21 @@ export class GameState {
   public map: GameMap;
 }
 
+export class Action {
+  constructor(
+    public readonly unitId: string,
+    public readonly actionId: string,
+    public readonly coord: CubeCoord
+  ) {}
+
+  toString() {
+    return (
+      `UnitId: ${this.unitId} Action: ${this.actionId} ` +
+      `Coord: ${coordToString(this.coord)}`
+    );
+  }
+}
+
 export class GameEngine {
   constructor(
     public gameState: GameState,
@@ -50,6 +66,10 @@ export class GameEngine {
     return (
       unit.playerId === this.gameState.activePlayerId && unit.cooldown === 0
     );
+  }
+
+  public findUnitById(unitId: String): Unit | null {
+    return this.gameState.units.find((unit) => unit.id === unitId);
   }
 
   public findUnitAtCoordinate(coord: CubeCoord): Unit | null {
@@ -78,11 +98,13 @@ export class GameEngine {
     );
   }
 
-  //TODO: this is just a junky stub
-  public takeAction(unit: Unit, coord: CubeCoord) {
-    console.log("take action:", unit);
-    unit.position = coord;
-    unit.cooldown = 1;
+  public takeAction(action: Action) {
+    console.log("take action:", action);
+    if (action.actionId === "move") {
+      const unit = this.findUnitById(action.unitId);
+      unit.position = action.coord;
+      unit.cooldown = 1;
+    }
     this.updateState();
   }
 
