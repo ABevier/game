@@ -114,17 +114,22 @@ export class MainScene extends Phaser.Scene {
     return renderedUnit;
   }
 
+  //TODO: this needs to be like an input manager or something
   private async collectInput() {
-    console.log("INPUT STATE: wait for unit click");
-    let unit: Unit = null;
-    let isValid = false;
-    do {
-      unit = await this.waitForClickedUnit();
-      isValid = this.gameEngine.canActivateUnit(unit);
-    } while (!isValid);
+    let unit: Unit = this.gameEngine.findActiveUnit();
+    if (!unit) {
+      console.log("INPUT STATE: wait for unit click");
+      let isValid = false;
+      do {
+        unit = await this.waitForClickedUnit();
+        isValid = this.gameEngine.canActivateUnit(unit);
+      } while (!isValid);
+    } else {
+      console.log(`INPUT STATE: Already have active unit: ${unit.id}`);
+    }
 
     console.log(`INPUT STATE: selected unit ${unit.id} waiting for menu click`);
-    const options = ["move", "attack"];
+    const options = this.gameEngine.findOptionsForUnit(unit);
     const result = await waitForMenuSelection(
       this,
       { x: 700, y: 400 },
@@ -132,13 +137,25 @@ export class MainScene extends Phaser.Scene {
     );
 
     const actionId = options[result.i];
-    console.log(`INPUT STATE: selected ${actionId} waiting for tile click`);
+    console.log(`INPUT STATE: selected ${actionId}`);
 
-    const neighbors = this.gameEngine.findMovesForUnit(unit);
-    this.hexMap.highlightTiles(this, neighbors);
+    let coord: CubeCoord = null;
+    if (actionId === "move") {
+      console.log(`INPUT STATE: waiting for movement selection`);
+      const neighbors = this.gameEngine.findMovesForUnit(unit);
+      this.hexMap.highlightTiles(this, neighbors);
 
-    let coord = await this.waitForClickedHighlightedTile();
-    this.hexMap.clearHighlights();
+      coord = await this.waitForClickedHighlightedTile();
+      this.hexMap.clearHighlights();
+    } else if (actionId === "attack") {
+      console.log(`INPUT STATE: waiting for movement selection`);
+      // TODO: make a real attack range finder
+      const neighbors = this.gameEngine.findNeighborsForCoord(unit.position);
+      this.hexMap.highlightTiles(this, neighbors);
+
+      coord = await this.waitForClickedHighlightedTile();
+      this.hexMap.clearHighlights();
+    }
 
     console.log("INPUT STATE: complete");
 

@@ -8,12 +8,6 @@ interface PathValue {
 }
 
 class Pathfinder {
-  // public findMovesForUnit(game: GameEngine, unit: Unit): CubeCoord[] {
-  //   return game
-  //     .findNeighborsForCoord(unit.position)
-  //     .filter((coord) => !game.findUnitAtCoordinate(coord));
-  // }
-
   public findMovesForUnit(game: GameEngine, unit: Unit): CubeCoord[] {
     const openList: PathValue[] = [];
     const closedList = new CoordMap<CubeCoord>();

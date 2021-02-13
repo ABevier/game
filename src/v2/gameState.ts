@@ -4,6 +4,8 @@ import { coordToString } from "./coordUtil";
 import HexUtil from "./hexUtil";
 import Pathfinder from "./pathfinder";
 
+//TODO: all of these classes need to be interfaces!!
+
 export class GameMap {
   constructor(public readonly width: number, public readonly height: number) {}
 }
@@ -31,12 +33,23 @@ export class Unit {
   ) {}
 }
 
+export interface CurrentTurnState {
+  activeUnitId: string | null;
+  unitHasMoved: boolean;
+  unitHasAttacked: boolean;
+}
+
 export class GameState {
   public activePlayerId: string;
   //TODO: should this be a map?
   public players: Player[] = [];
 
-  public activeUnitId: string;
+  public currentTurnState: CurrentTurnState = {
+    activeUnitId: null,
+    unitHasAttacked: false,
+    unitHasMoved: false,
+  };
+
   public units: Unit[] = [];
   public map: GameMap;
 }
@@ -72,9 +85,36 @@ export class GameEngine {
     return this.gameState.units.find((unit) => unit.id === unitId);
   }
 
+  public findActiveUnit(): Unit | null {
+    if (this.gameState.currentTurnState.activeUnitId) {
+      return this.findUnitById(this.gameState.currentTurnState.activeUnitId);
+    }
+    return null;
+  }
+
   public findUnitAtCoordinate(coord: CubeCoord): Unit | null {
     //consider not using lodash for this and just making CubeCoord a class?
     return this.gameState.units.find((unit) => isEqual(unit.position, coord));
+  }
+
+  public findOptionsForUnit(unit: Unit): string[] {
+    const {
+      unitHasMoved,
+      unitHasAttacked,
+      activeUnitId,
+    } = this.gameState.currentTurnState;
+
+    const result: string[] = [];
+    if (!unitHasMoved) {
+      result.push("move");
+    }
+    if (!unitHasAttacked) {
+      result.push("attack");
+    }
+    if (activeUnitId) {
+      result.push("end turn");
+    }
+    return result;
   }
 
   public findMovesForUnit(unit: Unit): CubeCoord[] {
@@ -100,15 +140,35 @@ export class GameEngine {
 
   public takeAction(action: Action) {
     console.log("take action:", action);
+    const unit = this.findUnitById(action.unitId);
+
     if (action.actionId === "move") {
-      const unit = this.findUnitById(action.unitId);
+      console.log("do move");
       unit.position = action.coord;
-      unit.cooldown = 1;
+      this.gameState.currentTurnState.activeUnitId = unit.id;
+      this.gameState.currentTurnState.unitHasMoved = true;
+    } else if (action.actionId === "attack") {
+      console.log("do attack");
+      const target = this.findUnitAtCoordinate(action.coord);
+      if (target) {
+        console.log("would attack", target);
+      }
+      unit.cooldown += 2;
+
+      this.gameState.currentTurnState.activeUnitId = unit.id;
+      this.gameState.currentTurnState.unitHasAttacked = true;
+    } else if (action.actionId === "end turn") {
+      if (unit.cooldown === 0) {
+        unit.cooldown = 1;
+      }
+      this.onEndTurn();
     }
-    this.updateState();
+
+    console.log("finished updating state, invoking callback");
+    this.onStateUpdated(this.gameState);
   }
 
-  private updateState() {
+  private onEndTurn() {
     const otherPlayer = this.gameState.players.find(
       (player) => player.id !== this.gameState.activePlayerId
     );
@@ -119,8 +179,12 @@ export class GameEngine {
     ]);
 
     this.gameState.activePlayerId = nextPlayerId;
-    console.log("finished updating state, invoking callback");
-    this.onStateUpdated(this.gameState);
+    this.gameState.currentTurnState = {
+      activeUnitId: null,
+      unitHasMoved: false,
+      unitHasAttacked: false,
+    };
+    console.log("finished updating to new turn");
   }
 
   private findNextActivePlayer(playersIds: string[]): string {

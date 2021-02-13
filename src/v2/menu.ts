@@ -10,6 +10,7 @@ export const waitForMenuSelection = async (
   pixel: Pixel,
   options: string[]
 ) => {
+  console.log("Menu will display:", options);
   const items = options.map((text, i) => {
     const btn = scene.add
       .text(pixel.x, pixel.y + i * 28, text, {
